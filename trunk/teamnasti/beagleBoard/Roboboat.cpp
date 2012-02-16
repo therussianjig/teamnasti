@@ -30,13 +30,13 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture = cvCaptureFromCAM(1);
+	CvCapture* g_capture = cvCaptureFromCAM(-1);
 	motors.resize(6);
 	
-	cport_nr=0,        /* /dev/ttyS0 (COM1 on windows) */
-    bdrate=115200;       /* 9600 baud */
+	int cport_nr=2;       /* /dev/ttyS0 (COM1 on windows) */
+    int bdrate=115200;       /* 9600 baud */
 	OpenComport(cport_nr, bdrate);
-	SendByte(cport_nr, 'J');
+
     if(!cvGrabFrame(g_capture)) // capture a frame
 	{             
             printf("Could not grab a frame\n\7");
@@ -52,6 +52,8 @@ int main()
 	//img = cvLoadImage("horizon3.jpg");
 	while(1==1)
 	{   
+		SendByte(cport_nr, 'J');
+		
 		// retrieve the captured frame and display it in a window 
 		img =cvRetrieveFrame(g_capture); 
 #ifdef _DEBUG

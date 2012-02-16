@@ -9,6 +9,8 @@
 
 #ifdef unix
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #endif
 
 #include "stdafx.h"
@@ -92,7 +94,7 @@ int main()
 		 
 		//navigateChannel(path, motors);
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
 			//motors[i] = 5;
@@ -166,16 +168,24 @@ int main()
 		char str[10];
 
 		strcpy(fName, "test"); /* copy name into the new var */
+		
+		#ifdef unix
+		sprintf(str,"%d",imgCount);
+		
+		#else
 		itoa(imgCount, str, 10); // 10 - decimal; 
+		
+		#endif
+		
 		strcat(fName, str);
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
 		cvSaveImage(fName, out);
 		//Show altered image in another window
-		cvShowImage( "out", out );
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
-#endif
+//#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program

@@ -17,6 +17,7 @@ using namespace cv;
 
 int main()
 {
+	int imgCount = 10;
 	int key;
 	IplImage* img = 0;
 	vector<char> motors;
@@ -33,8 +34,8 @@ int main()
 	CvCapture* g_capture = cvCaptureFromCAM(-1);
 	motors.resize(6);
 	
-	int cport_nr=2;       /* /dev/ttyS0 (COM1 on windows) */
-    int bdrate=115200;       /* 9600 baud */
+	int cport_nr=2;       // /dev/ttyS2 (COM3 on windows)
+    int bdrate=115200;
 	OpenComport(cport_nr, bdrate);
 
     if(!cvGrabFrame(g_capture)) // capture a frame
@@ -88,7 +89,7 @@ int main()
 		constructWall(greenBuoys, greenWall);
 		constructWall(redBuoys, redWall);
 		constructWall(blueBuoys, blueWall);
-		
+		 
 		//navigateChannel(path, motors);
 
 #ifdef _DEBUG
@@ -161,6 +162,16 @@ int main()
 		//********************************************************************
 		//********************************************************************
 		
+		char fName[50];
+		char str[10];
+
+		strcpy(fName, "test"); /* copy name into the new var */
+		itoa(imgCount, str, 10); // 10 - decimal; 
+		strcat(fName, str);
+		strcat(fName, ".jpeg"); /* add the extension */
+		imgCount++;
+
+		cvSaveImage(fName, out);
 		//Show altered image in another window
 		cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself

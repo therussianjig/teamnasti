@@ -5,9 +5,11 @@
 // Include this file in all other .cpp files in the program 
 
 #pragma once
+#pragma warning( disable : 4267 4996)
 
 #include <stdlib.h>
 #include <math.h>
+
 
 #ifdef unix
 #include </usr/include/opencv/cv.h>

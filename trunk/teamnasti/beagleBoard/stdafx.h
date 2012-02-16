@@ -12,6 +12,7 @@
 #ifdef unix
 #include </usr/include/opencv/cv.h>
 #include </usr/include/opencv/highgui.h>
+#include "rs232.h"
 
 #else
 #include <C:\opencv\include\opencv\cv.h>

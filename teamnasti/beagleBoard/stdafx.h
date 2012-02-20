@@ -17,8 +17,8 @@
 #include "rs232.h"
 
 #else
-#include <C:\opencv\include\opencv\cv.h>
-#include <C:\opencv\include\opencv\highgui.h>
+#include <\opencv\include\opencv\cv.h>
+#include <\opencv\include\opencv\highgui.h>
 #include "rs232WIN.h"
 
 #endif

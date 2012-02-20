@@ -34,8 +34,8 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("Untitled 1.avi");
+	CvCapture* g_capture = cvCaptureFromCAM(-1);
+	//CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	assert(g_capture); 
@@ -62,8 +62,8 @@ int main()
 		SendByte(cport_nr, 'J');
 		
 		// retrieve the captured frame and display it in a window 
-		//img =cvRetrieveFrame(g_capture);   //from camera
-		img = cvQueryFrame(g_capture);       //from video
+		img =cvRetrieveFrame(g_capture);   //from camera
+		//img = cvQueryFrame(g_capture);       //from video
 		//img = cvLoadImage("horizon3.jpg"); //from image
 		 if( !img ) break; 
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ int main()
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
-		int horizon = 50;
+		int horizon = img->height/2;
 		
 		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 		cvCopy(img, out, NULL);
@@ -90,16 +90,17 @@ int main()
 
 		//construct the gates
 		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
-
-		//find the path
-		findPath(img, gates, path);
 		
 		//build the walls
 		constructWall(greenBuoys, greenWall);
 		constructWall(redBuoys, redWall);
 		constructWall(blueBuoys, blueWall);
 		 
-		navigateChannel(path, motors);
+		//find the path
+		//findPath(img, gates, path);
+
+		//Determine motor signals
+		//navigateChannel(path, motors);
 
 //#ifdef _DEBUG
 		for(unsigned int i = 0; i < motors.size(); i++)
@@ -147,13 +148,11 @@ int main()
 		}
 
 		//draw the target path
-		//cvLine(out, cvPoint( img->width/2, img->height), cvPoint(img->width/2, 0), CV_RGB(0, 0, 0), 3);
-		//cout<<img->height<<endl;
 		for(unsigned int i = 0; i < path.size(); i++)
 		{
 			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);		
-			//cout<<path[i].length<<" , "<<path[i].slope<<endl;
 		}
+
 		////draw the walls
 		for(unsigned int i = 0; i < greenWall.size(); i++)
 		{

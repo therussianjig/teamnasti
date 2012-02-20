@@ -21,6 +21,7 @@ int main()
 {
 	int imgCount = 10;
 	int key;
+	int key2;
 	IplImage* img = 0;
 	vector<char> motors;
 	vector<buoy> greenBuoys;
@@ -33,7 +34,11 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture = cvCaptureFromCAM(-1);
+	//CvCapture* g_capture = cvCaptureFromCAM(-1);
+	CvCapture* g_capture = cvCreateFileCapture("Untitled 1.avi");
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+	assert(g_capture); 
 	motors.resize(6);
 	
 	int cport_nr=2;       // /dev/ttyS2 (COM3 on windows)
@@ -52,20 +57,22 @@ int main()
 #endif
 	//cvCreateTrackbar("Position","in",&g_slider_position,inv,onTrackbarSlide);
 	//have to put this outside the loop, or you will leak memory all over the floor
-	//img = cvLoadImage("horizon3.jpg");
 	while(1==1)
 	{   
 		SendByte(cport_nr, 'J');
 		
 		// retrieve the captured frame and display it in a window 
-		img =cvRetrieveFrame(g_capture); 
+		//img =cvRetrieveFrame(g_capture);   //from camera
+		img = cvQueryFrame(g_capture);       //from video
+		//img = cvLoadImage("horizon3.jpg"); //from image
+		 if( !img ) break; 
 #ifdef _DEBUG
 		cvShowImage( "in", img ); 
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
 		int horizon = 50;
-
+		
 		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 		cvCopy(img, out, NULL);
 
@@ -79,20 +86,20 @@ int main()
 		findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
-		//findBuoy(img, horizon, 'b', blueBuoys);
+		findBuoy(img, horizon, 'b', blueBuoys);
 
 		//construct the gates
 		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
 
 		//find the path
-		//findPath(img, gates, path);
+		findPath(img, gates, path);
 		
 		//build the walls
 		constructWall(greenBuoys, greenWall);
 		constructWall(redBuoys, redWall);
 		constructWall(blueBuoys, blueWall);
 		 
-		//navigateChannel(path, motors);
+		navigateChannel(path, motors);
 
 //#ifdef _DEBUG
 		for(unsigned int i = 0; i < motors.size(); i++)
@@ -164,32 +171,35 @@ int main()
 		//********************************************************************
 		//********************************************************************
 		
-		char fName[50];
-		char str[10];
+		//char fName[50];
+		//char str[10];
 
-		strcpy(fName, "test"); /* copy name into the new var */
-		
-		#ifdef unix
-		sprintf(str,"%d",imgCount);
-		
-		#else
-		itoa(imgCount, str, 10); // 10 - decimal; 
-		
-		#endif
-		
-		strcat(fName, str);
-		strcat(fName, ".jpeg"); /* add the extension */
-		imgCount++;
+		//strcpy(fName, "test"); /* copy name into the new var */
+		//
+		//#ifdef unix
+		//sprintf(str,"%d",imgCount);
+		//
+		//#else
+		//itoa(imgCount, str, 10); // 10 - decimal; 
+		//
+		//#endif
+		//
+		//strcat(fName, str);
+		//strcat(fName, ".jpeg"); /* add the extension */
+		//imgCount++;
 
-		cvSaveImage(fName, out);
+		//cvSaveImage(fName, out);
 		//Show altered image in another window
-		//cvShowImage( "out", out );
+		cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program
-
+		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
+		key2=cvWaitKey(-1);
+		if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
+		else if (key2 == 32) {break;}  // Press 'space' to exit program
 	}
 #ifdef _DEBUG
 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create

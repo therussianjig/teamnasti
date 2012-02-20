@@ -1,4 +1,4 @@
-//Max sucks never //test//test/*****************************************************************************************
+/*****************************************************************************************
 * Author: Terry Max Christy
 * Bradley University 
 * Nautical Autonomous System with Task Integration (code name NASTI)

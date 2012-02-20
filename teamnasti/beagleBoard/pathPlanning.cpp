@@ -12,38 +12,35 @@ using namespace cv;
 void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 {	
 	vector<buoy> buoysSorted;
-	//int key;
 	//run processing on the stuff in the water only *************************************
 	//KEEP 11/5/11
 	IplImage* out =  cvCreateImage(cvGetSize(in), in->depth, in->nChannels);
 	cvCopy(in, out, NULL);
-	//int x = out->origin; 
-	//int y = 0;
-	//if(horizon < out ->height)
-	//{
-	//	y = out->origin + horizon;
-	//}
-	//else y = out->origin;
-	//int width = out->width;
-	//int height = out->height - y;
-	//int add = 100;
-	////Make a recatangle of the water 
-	//CvRect water = cvRect(x,y,width,height);
-	////Make subimage of just the water, no point waisting processing power on the sky/trees
-	//IplImage *water_img = cvCreateImageHeader(cvSize(water.width,water.height), out->depth, out->nChannels);
-	//water_img->origin = out->origin;
-	//water_img->widthStep = out->widthStep;
-	//water_img->imageData = out->imageData + water.y * out->widthStep + water.x * out->nChannels;
-	//
-	////blur the image using the median smoothing algorithm
-	//cvSmooth(water_img, water_img, CV_BLUR, 5, 5);
+	int x = out->origin; 
+	int y = 0;
+	if(horizon < out ->height)
+	{
+		y = out->origin + horizon;
+	}
+	else y = out->origin;
+	int width = out->width;
+	int height = out->height - y;
+	int add = 100;
+	//Make a recatangle of the water 
+	CvRect water = cvRect(x,y,width,height);
+	//Make subimage of just the water, no point waisting processing power on the sky/trees
+	IplImage *water_img = cvCreateImageHeader(cvSize(water.width,water.height), out->depth, out->nChannels);
+	water_img->origin = out->origin;
+	water_img->widthStep = out->widthStep;
+	water_img->imageData = out->imageData + water.y * out->widthStep + water.x * out->nChannels;
+
 	////************************************************************************************
 	//^^^^this block will probably cut processing time down, a good thing. However I am not 
 	//sure yet how to integrate it into the following blocks to make it useful
 	//************************************************************************************
-	IplImage* hsvImg       = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 3);
-	IplImage* thresholded  = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
-	IplImage* thresholded2 = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
+	IplImage* hsvImg       = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 3);
+	IplImage* thresholded  = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 1);
+	IplImage* thresholded2 = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 1);
 
 	CvScalar hsv_min;
 	CvScalar hsv_max;
@@ -86,7 +83,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 
-	cvCvtColor(in, hsvImg, CV_RGB2HSV);
+	cvCvtColor(water_img, hsvImg, CV_RGB2HSV);
 
 	cvInRangeS(hsvImg,  hsv_min,  hsv_max,  thresholded);
 	cvInRangeS(hsvImg, hsv_min2, hsv_max2, thresholded2);
@@ -101,11 +98,13 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
 
+#ifdef _DEBUG
 	//make an image so I can see what is happening durring the edge detection
 	IplImage* edge = doCanny(thresholded, 100,200, 3);
 	cvNamedWindow( "edge",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "edge", edge );
 	cvReleaseImage(&edge);	
+#endif
 
 	//find  circles
 	CvMemStorage* storage = cvCreateMemStorage(0);
@@ -159,36 +158,21 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 			}
 		}
 	}
-	//draw the circles using the flipped vector of buoys
-	//for(int i = 0; i < buoys.size(); i++)
-	//{
-	//	CvPoint pt = cvPoint(cvRound(buoys[i].x), cvRound(buoys[i].y));
-	//	cvCircle(out, pt, cvRound(buoys[i].radius), CV_RGB(255, 255, 255));
-	//	cout<<pt.y<<endl;
-	//}
 
-	//draw the circles using the unflipped CvSeq values
-	//for(int i = 0; i < circles->total; i++)
-	//{
-	//	float* p = (float*) cvGetSeqElem(circles, i);
-	//	CvPoint pt = cvPoint(cvRound(p[0]), cvRound(p[1]));
-	//	cvCircle(out, pt, cvRound(p[2]), CV_RGB(255, 255, 255));
-	//	cout<<pt.y<<endl;
-	//}
+#ifdef _DEBUG
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "HSV", hsvImg );
-	cvReleaseMemStorage(&storage);
 	cvNamedWindow( "thresholded",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "thresholded", thresholded );
-	cvReleaseImage(&thresholded);
-	cvReleaseImage(&hsvImg);
 	cvNamedWindow( "thresholded2",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "thresholded2", thresholded2 );
+#endif
+
+	cvReleaseMemStorage(&storage);
+	cvReleaseImage(&thresholded);
+	cvReleaseImage(&hsvImg);
 	cvReleaseImage(&thresholded2);
 	cvReleaseImage(&out);
-	//return (0);
-	//return (hsvImg);
-	//return (thresholded);
 }
 
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)

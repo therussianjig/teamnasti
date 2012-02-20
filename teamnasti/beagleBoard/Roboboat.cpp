@@ -22,7 +22,8 @@ int main()
 	int imgCount = 10;
 	int key;
 	int key2;
-	IplImage* img = 0;
+	IplImage* img_full = 0;
+
 	vector<char> motors;
 	vector<buoy> greenBuoys;
 	vector<buoy> redBuoys;
@@ -34,10 +35,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture = cvCaptureFromCAM(-1);
-	//CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
-	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
-	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+	//CvCapture* g_capture = cvCaptureFromCAM(-1);
+	CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
+	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	assert(g_capture); 
 	motors.resize(6);
 	
@@ -62,8 +63,10 @@ int main()
 		SendByte(cport_nr, 'J');
 		
 		// retrieve the captured frame and display it in a window 
-		img =cvRetrieveFrame(g_capture);   //from camera
-		//img = cvQueryFrame(g_capture);       //from video
+		//img =cvRetrieveFrame(g_capture);   //from camera
+		img_full = cvQueryFrame(g_capture);       //from video
+		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img);
 		//img = cvLoadImage("horizon3.jpg"); //from image
 		 if( !img ) break; 
 #ifdef _DEBUG
@@ -71,9 +74,10 @@ int main()
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
-		int horizon = img->height/2;
-		
+		int horizon = 0; //img->height/2;
+
 		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
+		cout << img->depth << " " << img->nChannels << endl;
 		cvCopy(img, out, NULL);
 
 		//find the green buoys
@@ -83,10 +87,10 @@ int main()
 		findBuoy(img, horizon, 'r', redBuoys);
 
 		//find the yellow buoys
-		findBuoy(img, horizon, 'y', yellowBuoys);
+		//findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
-		findBuoy(img, horizon, 'b', blueBuoys);
+		//findBuoy(img, horizon, 'b', blueBuoys);
 
 		//construct the gates
 		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);

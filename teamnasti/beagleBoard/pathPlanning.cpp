@@ -24,23 +24,24 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	}
 	else y = out->origin;
 	int width = out->width;
-	int height = out->height - y;
+	int height = out->height + y;
 	int add = 100;
 	//Make a recatangle of the water 
-	CvRect water = cvRect(x,y,width,height);
+	CvRect water = cvRect(x,horizon,width,height);
+	cvSetImageROI( in, water);
 	//Make subimage of just the water, no point waisting processing power on the sky/trees
-	IplImage *water_img = cvCreateImageHeader(cvSize(water.width,water.height), out->depth, out->nChannels);
-	water_img->origin = out->origin;
-	water_img->widthStep = out->widthStep;
-	water_img->imageData = out->imageData + water.y * out->widthStep + water.x * out->nChannels;
+	//IplImage *water_img = cvCreateImageHeader(cvSize(water.width,water.height), out->depth, out->nChannels);
+	//water_img->origin = out->origin;
+	//water_img->widthStep = out->widthStep;
+	//water_img->imageData = out->imageData + water.y * out->widthStep + water.x * out->nChannels;
 
 	////************************************************************************************
 	//^^^^this block will probably cut processing time down, a good thing. However I am not 
 	//sure yet how to integrate it into the following blocks to make it useful
 	//************************************************************************************
-	IplImage* hsvImg       = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 3);
-	IplImage* thresholded  = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 1);
-	IplImage* thresholded2 = cvCreateImage(cvGetSize(water_img), IPL_DEPTH_8U, 1);
+	IplImage* hsvImg       = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 3);
+	IplImage* thresholded  = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
+	IplImage* thresholded2 = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
 
 	CvScalar hsv_min;
 	CvScalar hsv_max;
@@ -49,16 +50,16 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 
 	if(color == 'g')
 	{
-		hsv_min  = cvScalar( 40, 255, 255, 0);
+		hsv_min  = cvScalar( 50, 255, 255, 0);
 		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(40,  100, 100, 0);
+		hsv_min2 = cvScalar(50,  200, 150, 0);
 		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 	else if (color == 'r')
 	{
-		hsv_min  = cvScalar( 0, 100, 100, 0);
-		hsv_max  = cvScalar(0, 255, 255, 0);
-		hsv_min2 = cvScalar(100,  100, 200, 0);
+		hsv_min  = cvScalar( 0, 150, 100, 0);
+		hsv_max  = cvScalar(20, 255, 255, 0);
+		hsv_min2 = cvScalar(100,  150, 200, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
 	}
 	else if (color == 'y')
@@ -83,7 +84,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 
-	cvCvtColor(water_img, hsvImg, CV_RGB2HSV);
+	cvCvtColor(in, hsvImg, CV_RGB2HSV);
 
 	cvInRangeS(hsvImg,  hsv_min,  hsv_max,  thresholded);
 	cvInRangeS(hsvImg, hsv_min2, hsv_max2, thresholded2);
@@ -158,7 +159,14 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 			}
 		}
 	}
-
+	//if(buoys.size() > 0){
+	//	cout<<buoys[0].y<<"  " ;}
+	for(int j = 0; j < k; j++)
+	{
+		buoys[j].y = buoys[j].y + horizon;
+	}
+	//if(buoys.size() > 0){
+	//	cout<<buoys[0].y<<endl;}
 #ifdef _DEBUG
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "HSV", hsvImg );

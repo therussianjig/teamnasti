@@ -99,7 +99,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
 
-#ifdef _DEBUG
+#ifdef debug
 	//make an image so I can see what is happening durring the edge detection
 	IplImage* edge = doCanny(thresholded, 100,200, 3);
 	cvNamedWindow( "edge",CV_WINDOW_AUTOSIZE);
@@ -166,7 +166,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 		buoys[j].y = buoys[j].y + horizon;
 	}
 
-#ifdef _DEBUG
+#ifdef debug
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "HSV", hsvImg );
 	cvNamedWindow( "thresholded",CV_WINDOW_AUTOSIZE);

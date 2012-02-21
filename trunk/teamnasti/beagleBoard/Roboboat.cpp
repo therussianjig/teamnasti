@@ -36,10 +36,14 @@ int main()
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
 	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("Untitled 1.avi");
+	CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
-	assert(g_capture); 
+	
+	#ifndef unix
+	assert(g_capture); //assert is a windows ONLY macro
+	#endif
+
 	motors.resize(6);
 	
 	int cport_nr=2;       // /dev/ttyS2 (COM3 on windows)
@@ -51,7 +55,7 @@ int main()
             printf("Could not grab a frame\n\7");
             exit(0);
     }
-#ifdef _DEBUG
+#ifdef debug
 	 // create a window
 	cvNamedWindow( "in",CV_WINDOW_AUTOSIZE);
 	cvNamedWindow( "out",CV_WINDOW_AUTOSIZE);
@@ -69,7 +73,7 @@ int main()
 		cvResize(img_full,img);
 		//IplImage* img = cvLoadImage("yellow.jpg"); //from image
 		 if( !img ) break; 
-#ifdef _DEBUG
+#ifdef debug
 		cvShowImage( "in", img ); 
 #endif
 		//do stuff in here****************************************************
@@ -80,6 +84,8 @@ int main()
 
 		cvCopy(img, out, NULL);
 
+		
+		
 		//find the green buoys
 		findBuoy(img, horizon, 'g', greenBuoys);
 
@@ -106,7 +112,7 @@ int main()
 		//Determine motor signals
 		navigateChannel(path, motors);
 
-//#ifdef _DEBUG
+//#ifdef debug
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
 			//motors[i] = 5;
@@ -156,7 +162,7 @@ int main()
 		for(unsigned int i = 0; i < path.size(); i++)
 		{
 			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
-			cout<<path[i].length<<"  "<<path[i].slope<<endl;
+		//	cout<<path[i].length<<"  "<<path[i].slope<<endl;
 		}
 		cout<<endl;
 		////draw the walls
@@ -176,26 +182,26 @@ int main()
 		//********************************************************************
 		//********************************************************************
 		
-		//char fName[50];
-		//char str[10];
+		char fName[50];
+		char str[10];
 
-		//strcpy(fName, "test"); /* copy name into the new var */
-		//
-		//#ifdef unix
-		//sprintf(str,"%d",imgCount);
-		//
-		//#else
-		//itoa(imgCount, str, 10); // 10 - decimal; 
-		//
-		//#endif
-		//
-		//strcat(fName, str);
-		//strcat(fName, ".jpeg"); /* add the extension */
-		//imgCount++;
+		strcpy(fName, "test"); /* copy name into the new var */
+		
+		#ifdef unix
+		sprintf(str,"%d",imgCount);
+		
+		#else
+		itoa(imgCount, str, 10); // 10 - decimal; 
+		
+		#endif
+		
+		strcat(fName, str);
+		strcat(fName, ".jpeg"); /* add the extension */
+		imgCount++;
 
-		//cvSaveImage(fName, out);
+		cvSaveImage(fName, out);
 		//Show altered image in another window
-		cvShowImage( "out", out );
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
@@ -206,7 +212,7 @@ int main()
 		if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
 		else if (key2 == 32) {break;}  // Press 'space' to exit program
 	}
-#ifdef _DEBUG
+#ifdef debug
 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create
 	cvDestroyWindow("out");
 	//cvReleaseImage(&img); //I guess I don't need to do this 

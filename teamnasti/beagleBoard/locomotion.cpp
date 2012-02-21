@@ -75,7 +75,7 @@ void sideThrust(int frontLeft, int backLeft, int frontRight, int backRight, vect
 }
 void navigateChannel(vector<path> &path, vector<char> &motors)
 {
-	unsigned int closingOnGate = 50;
+	unsigned int closingOnGate = 100;
 	char direction = 'N';
 	char severity = 'N';
 	if(path[0].length < closingOnGate)
@@ -85,7 +85,7 @@ void navigateChannel(vector<path> &path, vector<char> &motors)
 	else
 	{
 		//don't need to turn
-		if(abs(path[0].slope) > 10)
+		if(abs(path[0].slope) > 5)
 		{
 			cout<<"Dead ahead Cap'n"<<endl;
 			severity = 'N';

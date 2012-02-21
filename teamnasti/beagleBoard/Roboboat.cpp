@@ -36,9 +36,9 @@ int main()
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
 	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+	CvCapture* g_capture = cvCreateFileCapture("Untitled 1.avi");
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	assert(g_capture); 
 	motors.resize(6);
 	
@@ -63,21 +63,21 @@ int main()
 		SendByte(cport_nr, 'J');
 		
 		// retrieve the captured frame and display it in a window 
-		//img =cvRetrieveFrame(g_capture);   //from camera
+		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
 		img_full = cvQueryFrame(g_capture);       //from video
 		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
 		cvResize(img_full,img);
-		//img = cvLoadImage("horizon3.jpg"); //from image
+		//IplImage* img = cvLoadImage("yellow.jpg"); //from image
 		 if( !img ) break; 
 #ifdef _DEBUG
 		cvShowImage( "in", img ); 
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
-		int horizon = 0; //img->height/2;
+		int horizon = img->height/3;
 
 		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
-		cout << img->depth << " " << img->nChannels << endl;
+
 		cvCopy(img, out, NULL);
 
 		//find the green buoys
@@ -87,7 +87,7 @@ int main()
 		findBuoy(img, horizon, 'r', redBuoys);
 
 		//find the yellow buoys
-		//findBuoy(img, horizon, 'y', yellowBuoys);
+		findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys);
@@ -101,10 +101,10 @@ int main()
 		constructWall(blueBuoys, blueWall);
 		 
 		//find the path
-		//findPath(img, gates, path);
+		findPath(img, gates, path);
 
 		//Determine motor signals
-		//navigateChannel(path, motors);
+		navigateChannel(path, motors);
 
 //#ifdef _DEBUG
 		for(unsigned int i = 0; i < motors.size(); i++)
@@ -149,14 +149,16 @@ int main()
 		for(unsigned int i = 0; i < gates.size(); i++)
 		{
 			cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
+			cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
 		}
 
 		//draw the target path
 		for(unsigned int i = 0; i < path.size(); i++)
 		{
-			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);		
+			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
+			cout<<path[i].length<<"  "<<path[i].slope<<endl;
 		}
-
+		cout<<endl;
 		////draw the walls
 		for(unsigned int i = 0; i < greenWall.size(); i++)
 		{

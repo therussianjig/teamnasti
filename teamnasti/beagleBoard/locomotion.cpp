@@ -1,5 +1,6 @@
 /*****************************************************************************************
 * Author: Terry Max Christy
+* Modified: Jeremy Borgman 2/21/2012
 * Bradley University 
 * Nautical Autonomous System with Task Integration (code name NASTI)
 * Date written: 10/20/11 Last Modified: 1/26/12

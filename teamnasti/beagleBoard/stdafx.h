@@ -23,6 +23,8 @@
 
 #endif
 
+#define debug 1
+
 #define aftPort      0
 #define forPort      1
 #define drive1       2

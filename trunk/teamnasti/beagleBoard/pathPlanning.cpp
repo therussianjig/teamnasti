@@ -58,16 +58,16 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	else if (color == 'r')
 	{
 		hsv_min  = cvScalar( 0, 150, 100, 0);
-		hsv_max  = cvScalar(20, 255, 255, 0);
+		hsv_max  = cvScalar(10, 255, 255, 0);
 		hsv_min2 = cvScalar(100,  150, 200, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
 	}
 	else if (color == 'y')
 	{
-		hsv_min  = cvScalar( 0, 190, 210, 0);
-		hsv_max  = cvScalar(10, 255, 255, 0);
-		hsv_min2 = cvScalar(80,  190, 210, 0);
-		hsv_max2 = cvScalar(100, 255, 255, 0);
+		hsv_min  = cvScalar( 0, 0, 250, 0);
+		hsv_max  = cvScalar(60, 10, 255, 0);
+		hsv_min2 = cvScalar(80,  0, 250, 0);
+		hsv_max2 = cvScalar(180, 10, 255, 0);
 	}
 	else if (color == 'b')
 	{
@@ -159,14 +159,13 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 			}
 		}
 	}
-	//if(buoys.size() > 0){
-	//	cout<<buoys[0].y<<"  " ;}
+	//adjust the buoy y location because the ROI sets a new origin at the top left of ROI
+	//the adjustment is needed so the buoys are locates properly relative to the whole image
 	for(int j = 0; j < k; j++)
 	{
 		buoys[j].y = buoys[j].y + horizon;
 	}
-	//if(buoys.size() > 0){
-	//	cout<<buoys[0].y<<endl;}
+
 #ifdef _DEBUG
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "HSV", hsvImg );
@@ -185,6 +184,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)
 {
+	unsigned int yellowBand = 100;
 	//make sure there is a pair of red/green buoys
 	if (greenBuoys.size() > 0 && redBuoys.size() > 0)
 	{
@@ -202,11 +202,12 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				{
 					for(unsigned int k = 0; k < yellowBuoys.size(); k++)
 					{
-						if((yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) + 30) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - 30))
+						if((yellowBuoys[k].y < ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
 						{
 							gates[i].yellow = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
 						}
-						else {gates[i].yellow = cvPoint(0, 0);}
+						else 
+						{gates[i].yellow = cvPoint(0, 0);}
 					}
 				}
 				else {gates[i].yellow = cvPoint(0, 0);}
@@ -226,11 +227,12 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				{
 					for(unsigned int k = 0; k < yellowBuoys.size(); k++)
 					{
-						if((yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) + 30) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - 30))
+						if((yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
 						{
 							gates[i].yellow = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
 						}
-						else {gates[i].yellow = cvPoint(0, 0);}
+						else
+						{gates[i].yellow = cvPoint(0, 0);}
 					}
 				}
 				else {gates[i].yellow = cvPoint(0, 0);}
@@ -250,7 +252,8 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 {
 	double x, y;
-	path.resize(gates.size());
+	if(gates.size() > 0){path.resize(gates.size());}
+	else {path.resize(1);}
 	//cout<<path.size()<<endl;
 	path[0].nearEnd = cvPoint( in->width/2, in->height);
 	if( gates.size() > 0 )
@@ -268,7 +271,7 @@ int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 			path[i].slope = (float)(path[i].farEnd.y - path[i].nearEnd.y)/(float)(path[i].farEnd.x - path[i].nearEnd.x);
 			x = (path[i].farEnd.x - path[i].nearEnd.x);
 			y = (path[i].farEnd.y - path[i].nearEnd.y);
-			path[i].length = sqrt((float)((x*x) + (y*y)));
+			path[i].length = y; //sqrt((float)((x*x) + (y*y)));
 		}
 
 	}
@@ -276,6 +279,9 @@ int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 	{
 		path[0].farEnd = cvPoint(cvRound(in->width/2), 0);
 		path[0].slope = (float)(path[0].farEnd.y - path[0].nearEnd.y)/(float)(path[0].farEnd.x - path[0].nearEnd.x);
+		x = (path[0].farEnd.x - path[0].nearEnd.x);
+		y = (path[0].farEnd.y - path[0].nearEnd.y);
+		path[0].length = sqrt((float)((x*x) + (y*y)));
 	}
 	return(0);
 }

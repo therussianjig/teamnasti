@@ -4,7 +4,7 @@ CFLAGS=`pkg-config --cflags opencv` `pkg-config --libs opencv` -Wall
 CC=g++
 EXECUTEABLE=roboboat
 
-OBJECTS = stdafx.o main.o pathPlanning.o imageProc.o locomotion.o
+OBJECTS = stdafx.o main.o pathPlanning.o imageProc.o locomotion.o rs232.o
 
 all: roboboat.o
 
@@ -13,6 +13,9 @@ roboboat.o: $(OBJECTS)
 
 main.o: Roboboat.cpp
 	$(CC) $(CFLAGS) -c Roboboat.cpp -o main.o
+
+rs232.o: rs232.c
+	$(CC) $(CFLAGS) -c rs232.c -o rs232.o
 
 locomotion.o: locomotion.cpp
 	$(CC) $(CFLAGs) -c locomotion.cpp

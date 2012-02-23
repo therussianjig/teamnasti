@@ -141,9 +141,9 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 //		//}
 //		if(ptr[(int)(x)])
 //		{
-//			buoys[k].x= p[0];
-//			buoys[k].y = p[1];
-//			buoys[k].radius = p[2];
+			buoys[k].x= x;
+			buoys[k].y = y;
+			buoys[k].radius = radius;
 //			k++;
 //		}
 	}

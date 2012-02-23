@@ -23,7 +23,7 @@
 
 #endif
 
-#define debug 1
+//#define debug 1
 
 #define aftPort      0
 #define forPort      1

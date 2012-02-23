@@ -36,7 +36,7 @@ int main()
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
 	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("Untitled 5.avi");
+	CvCapture* g_capture = cvCreateFileCapture("I:/testVideos/highTight.avi");
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -71,7 +71,7 @@ int main()
 		img_full = cvQueryFrame(g_capture);       //from video
 		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
 		cvResize(img_full,img);
-		//IplImage* img = cvLoadImage("yellow.jpg"); //from image
+		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
 		 if( !img ) break; 
 #ifdef debug
 		cvShowImage( "in", img ); 
@@ -93,7 +93,7 @@ int main()
 		findBuoy(img, horizon, 'r', redBuoys);
 
 		//find the yellow buoys
-		findBuoy(img, horizon, 'y', yellowBuoys);
+		//findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys);
@@ -155,7 +155,7 @@ int main()
 		for(unsigned int i = 0; i < gates.size(); i++)
 		{
 			cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
-			cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
+			//cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
 		}
 
 		//draw the target path
@@ -199,9 +199,9 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		cvSaveImage(fName, out);
+		//cvSaveImage(fName, out);
 		//Show altered image in another window
-		//cvShowImage( "out", out );
+		cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

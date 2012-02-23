@@ -52,7 +52,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	{
 		hsv_min  = cvScalar( 50, 255, 255, 0);
 		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(50,  200, 150, 0);
+		hsv_min2 = cvScalar(50,  190, 150, 0);
 		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 	else if (color == 'r')
@@ -95,6 +95,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9);
 	//cvDilate(hsvImg, hsvImg, NULL, 5);
 	cvDilate(thresholded, thresholded, NULL, 3);
+	cvDilate(thresholded, thresholded, NULL, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
@@ -109,7 +110,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 
 	//find  circles
 	CvMemStorage* storage = cvCreateMemStorage(0);
-	CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT,  4, 50, 200, 10, 1, 50);
+	CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT,  2, 50, 200, 10, 1, 50);
 	/*CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT, 4, 10, 200, 3, 1, 50);*/
 	
 	//Atempt to narrow the found buoys down to actual buoys by checking for the existance of a bouy 

@@ -9,7 +9,7 @@
 #pragma once
 
 
-void throttle(float length, vector<char> &motors);
+void throttle(float height, float length, vector<char> &motors);
 void turn( char severity, char direction, vector<char> &motors);
 void mainThrust(int motor1, int motor2, vector<char> &motors);
 void sideThrust(int frontLeft, int backLeft, int frontRight, int backRight, vector<char> &motors);

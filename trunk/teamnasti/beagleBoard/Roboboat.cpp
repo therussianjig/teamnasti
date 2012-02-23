@@ -36,7 +36,7 @@ int main()
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
 	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("I:/testVideos/highTight.avi");
+	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -47,7 +47,7 @@ int main()
 	motors.resize(6);
 	
 	int cport_nr=2;       // /dev/ttyS2 (COM3 on windows)
-    int bdrate=115200;
+    int bdrate=9600;
 	OpenComport(cport_nr, bdrate);
 
     if(!cvGrabFrame(g_capture)) // capture a frame

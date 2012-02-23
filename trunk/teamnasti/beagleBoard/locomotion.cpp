@@ -15,21 +15,10 @@ using namespace cv;
 
 void throttle(float length, vector<char> &motors)
 {
-	float maxLength = 300;
-	float minLength = 100;
-	int PWM = 0;
-	if(length > maxLength)
-	{
-		PWM = maxPWM;
-	}
-	else if (length < minLength)
-	{
-		PWM = minPWM;
-	}
-	else 
-	{
-		PWM = (int)((length - 100) * 0.5);
-	}
+
+	int PWM;
+	PWM = static_cast<int>(255 * length);
+
 	mainThrust(PWM, PWM, motors);
 }
 
@@ -119,6 +108,6 @@ void navigateChannel(vector<path> &path, vector<char> &motors)
 			}
 		}
 		turn(severity, direction, motors);
-		throttle(path[0].length, motors);
+		throttle((path[0].length / path[0].height), motors);
 	}
 }

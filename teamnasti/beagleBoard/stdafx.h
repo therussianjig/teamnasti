@@ -14,11 +14,15 @@
 #ifdef unix
 #include </usr/include/opencv/cv.h>
 #include </usr/include/opencv/highgui.h>
+#include </blob/BlobResult.h>
+#include </blob/blob.h>
 #include "rs232.h"
 
 #else
 #include <\opencv\include\opencv\cv.h>
 #include <\opencv\include\opencv\highgui.h>
+#include <\cvblobslib\BlobResult.h>
+#include <\cvblobslib\blob.h>
 #include "rs232WIN.h"
 
 #endif

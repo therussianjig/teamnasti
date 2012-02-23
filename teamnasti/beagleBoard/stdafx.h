@@ -65,6 +65,7 @@ typedef struct
 	CvPoint nearEnd;
 	float slope;
 	float length;
+	float height;
 } path;
 
 

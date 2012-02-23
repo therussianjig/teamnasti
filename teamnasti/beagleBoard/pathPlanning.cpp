@@ -256,6 +256,7 @@ int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 	if(gates.size() > 0){path.resize(gates.size());}
 	else {path.resize(1);}
 	//cout<<path.size()<<endl;
+	path[0].height = in->height;
 	path[0].nearEnd = cvPoint( in->width/2, in->height);
 	if( gates.size() > 0 )
 	{

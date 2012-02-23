@@ -19,7 +19,7 @@ using namespace cv;
 
 int main()
 {
-	int imgCount = 10;
+	int imgCount = 1;
 	int key;
 	int key2;
 	IplImage* img_full = 0;
@@ -113,12 +113,21 @@ int main()
 		navigateChannel(path, motors);
 
 //#ifdef debug
+		
+		SendByte(cport_nr,'*');
+		SendByte(cport_nr,'*');
+		SendByte(cport_nr,'*');
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
 			//motors[i] = 5;
 			cout<<(int)motors[i]<<"   ";
+			SendByte(cport_nr,char(motors[i]));
 		}
 		cout<<endl;
+
+
+
+
 
 		/** Drawing Stuff **********************************************************/
 		//draw the green buoys
@@ -187,30 +196,41 @@ int main()
 
 		strcpy(fName, "test"); /* copy name into the new var */
 		
+		if (imgCount < 10) {
+			strcat(fName, "000");
+		}
+
+		else if (imgCount < 100) {
+			strcat(fName, "00");
+		}
+
+		else if (imgCount < 1000) {
+			strcat(fName, "0");
+		}
+
 		#ifdef unix
 		sprintf(str,"%d",imgCount);
 		
 		#else
 		itoa(imgCount, str, 10); // 10 - decimal; 
-		
 		#endif
 		
 		strcat(fName, str);
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		//cvSaveImage(fName, out);
+		cvSaveImage(fName, out);
 		//Show altered image in another window
-		cvShowImage( "out", out );
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
-		key=cvWaitKey(1);
+		/*key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key2=cvWaitKey(-1);
 		if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
-		else if (key2 == 32) {break;}  // Press 'space' to exit program
+		else if (key2 == 32) {break;}  // Press 'space' to exit program*/
 	}
 #ifdef debug
 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create

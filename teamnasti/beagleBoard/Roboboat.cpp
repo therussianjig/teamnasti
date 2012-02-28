@@ -221,7 +221,7 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		cvSaveImage(fName, out);
+		//cvSaveImage(fName, out);
 		//Show altered image in another window
 		cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself

@@ -24,10 +24,11 @@
 #include <\cvblobslib\BlobResult.h>
 #include <\cvblobslib\blob.h>
 #include "rs232WIN.h"
+#define debug
 
 #endif
 
-#define debug 1
+
 
 #define aftPort      0
 #define forPort      1

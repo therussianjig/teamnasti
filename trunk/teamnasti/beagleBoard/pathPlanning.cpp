@@ -118,8 +118,9 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	
 	buoys.resize(blobs.GetNumBlobs());
 	int k = 0;
-	for(int i = 0; i < (blobs.GetNumBlobs()); i++)
+	for(int i = 0; i < (blobs.GetNumBlobs()-1); i++)
 	{
+		cout<<blobs.GetNumBlobs()<<endl;
 		//float* p = (float*) cvGetSeqElem(circles, i);
 		float x = (float)(blobs.GetBlob(i)->MinX() + (( blobs.GetBlob(i)->MaxX() - blobs.GetBlob(i)->MinX() ) / 2.0));
 		
@@ -128,6 +129,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 		float diameter = 2*radius;
 		float n =0;
 		float total = diameter*diameter;
+		cout<<"blob   ";
 		cout<<x<<"  "<<y<<"  "<<i<<endl;
 		k++;
 ////		for( int k = 0; k < 2*p[2]; k++)

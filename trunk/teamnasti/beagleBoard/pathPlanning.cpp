@@ -52,14 +52,14 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	{
 		hsv_min  = cvScalar( 50, 255, 255, 0);
 		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(50,  190, 150, 0);
+		hsv_min2 = cvScalar(50, 200, 50, 0);
 		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 	else if (color == 'r')
 	{
 		hsv_min  = cvScalar( 0, 150, 100, 0);
-		hsv_max  = cvScalar(10, 255, 255, 0);
-		hsv_min2 = cvScalar(100,  150, 200, 0);
+		hsv_max  = cvScalar(30, 255, 255, 0);
+		hsv_min2 = cvScalar(100,  150, 100, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
 	}
 	else if (color == 'y')
@@ -91,10 +91,10 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	cvOr(thresholded, thresholded2, thresholded);
 
 	//Atempt to doctor the image so that the circles are found easier
-	//cvErode(thresholded, thresholded, NULL, 4);
+	cvErode(thresholded, thresholded, NULL, 1);
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9);
 	//cvDilate(hsvImg, hsvImg, NULL, 5);
-	cvDilate(thresholded, thresholded, NULL, 3);
+	//cvDilate(thresholded, thresholded, NULL, 3);
 	//cvDilate(thresholded, thresholded, NULL, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
@@ -102,10 +102,10 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 
 #ifdef debug
 	//make an image so I can see what is happening durring the edge detection
-	IplImage* edge = doCanny(thresholded, 100,200, 3);
-	cvNamedWindow( "edge",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "edge", edge );
-	cvReleaseImage(&edge);	
+	//IplImage* edge = doCanny(thresholded, 100,200, 3);
+	//cvNamedWindow( "edge",CV_WINDOW_AUTOSIZE);
+	//cvShowImage( "edge", edge );
+	//cvReleaseImage(&edge);	
 #endif
 
 	/* Using the cvHoughCircles method - not that good. Doesn't find enough of the buoys and is inconsistant*/
@@ -137,13 +137,13 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 //		//		else n = n;
 //		//	}
 //		//}
-//		if(ptr[(int)(x)])
-//		{
+		if(radius > 7)
+		{
 			buoys[k].x= x;
 			buoys[k].y = y;
 			buoys[k].radius = radius;
 			k++;
-//		}
+		}
 	}
 
 	//Atempt to narrow the found buoys down to actual buoys by checking for the existance of a bouy 
@@ -293,6 +293,7 @@ int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 	path[0].nearEnd = cvPoint( in->width/2, in->height);
 	if( gates.size() > 0 )
 	{
+		path[0].height = (float)in->height;
 		path[0].farEnd = gates[0].goal;
 		path[0].slope = (float)(path[0].farEnd.y - path[0].nearEnd.y)/(float)(path[0].farEnd.x - path[0].nearEnd.x);
 		x = (path[0].farEnd.x - path[0].nearEnd.x);

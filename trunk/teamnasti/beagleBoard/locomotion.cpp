@@ -13,64 +13,21 @@
 using namespace std;
 using namespace cv;
 
-void throttle(float length, vector<char> &motors)
+void navigateChannel(vector<path> &path, vector<float> &motors)
 {
-
-	int PWM;
-	PWM = static_cast<int>(255 * length);
-
-	mainThrust(PWM, PWM, motors);
-}
-
-void turn( char severity, char direction, vector<char> &motors)
-{
-	int PWM = 0;
-	if(severity = 'H')      {PWM = 100;}
-	else if(severity = 'S') {PWM =  50;}
-	else                    {PWM =   0;}
-
-	if( direction = 'L' ) 
-	{sideThrust(-PWM, PWM, -PWM, PWM, motors);}
-	else                  
-	{sideThrust(PWM, -PWM, PWM, -PWM, motors);}
-}
-
-void mainThrust(int motor1, int motor2, vector<char> &motors)
-{
-	motors[drive1] = (char)(abs(motor1) * (255/100));
-	if(motor1 < 0) {motors[drive1] ^= 0x01;}
-	else           {motors[drive1] &= 0xFE;}
-	motors[drive2] = (char)(abs(motor2) * (255/100));
-	if(motor1 < 0) {motors[drive2] ^= 0x01;}
-	else           {motors[drive2] &= 0xFE;}
-}
-
-void sideThrust(int frontLeft, int backLeft, int frontRight, int backRight, vector<char> &motors)
-{
-	motors[aftPort] = (char)(abs(frontLeft) * (255/100));
-	if(frontLeft < 0) {motors[aftPort] ^= 0x01;}
-	else              {motors[aftPort] &= 0xFE;}
-	
-	motors[forPort] = (char)(abs(backLeft) * (255/100));
-	if(backLeft < 0) {motors[forPort] ^= 0x01;}
-	else             {motors[forPort] &= 0xFE;}
-
-	motors[aftStarboard] = (char)(abs(frontRight) * (255/100));
-	if(frontRight < 0) {motors[aftStarboard] ^= 0x01;}
-	else               {motors[aftStarboard] &= 0xFE;}
-	
-	motors[forStarboard] = (char)(abs(backRight) * (255/100));
-	if(backRight < 0) {motors[forStarboard] ^= 0x01;}
-	else              {motors[forStarboard] &= 0xFE;}
-}
-void navigateChannel(vector<path> &path, vector<char> &motors)
-{
-	unsigned int closingOnGate = 100;
+	float closingOnGate = path[0].height/4 ;
+	float throttlePWM = 0;
+	float closingPWM  = 25;
+	float PWMoffset = 25;
 	char direction = 'N';
 	char severity = 'N';
+
 	if(path[0].length < closingOnGate)
 	{
 		cout<<"WE'RE GOING IN!!!!!"<<endl;
+
+		//set throttle value to an 'enter gate' speed
+		throttlePWM = closingPWM;
 	}
 	else
 	{
@@ -107,7 +64,92 @@ void navigateChannel(vector<path> &path, vector<char> &motors)
 				severity = 'S';
 			}
 		}
-		turn(severity, direction, motors);
-		throttle((path[0].length / path[0].height), motors);
+		//set throttle value proportional to the length of the path line
+		throttlePWM = (path[0].length / path[0].height)*100 + PWMoffset;
 	}
+
+	turn(severity, direction, motors);
+	throttle(throttlePWM, motors);
+}
+
+void throttle(float PWM, vector<float> &motors)
+{
+	mainThrust(PWM, PWM, motors);
+}
+
+/* 
+* Currently performs a pivot motion using only the side thrusters
+*/
+void turn( char severity, char direction, vector<float> &motors)
+{
+	float PWM = 0;
+	if(severity == 'H')      {PWM = 100;}
+	else if(severity == 'S') {PWM =  50;}
+	else                    {PWM =   0;}
+
+	if( direction == 'L' ) 
+	{sideThrust(-PWM, PWM, -PWM, PWM, motors);}
+	else                  
+	{sideThrust(PWM, -PWM, PWM, -PWM, motors);}
+}
+
+void mainThrust(float motor1, float motor2, vector<float> &motors)
+{
+	if     (motor1 < -100) motor1 = -100;
+	else if(motor1 >  100) motor1 =  100;
+	motors[drive1] = motor1;
+	if     (motor2 < -100) motor2 = -100;
+	else if(motor2 >  100) motor2 =  100;
+	motors[drive2] = motor2;
+
+}
+
+/*
+* I made this a seperate function from turn so that turn can be used in main buoy nav easily
+* but if you want individual control of the side thrusters, use sideThrust
+*/
+void sideThrust(float frontLeft, float backLeft, float frontRight, float backRight, vector<float> &motors)
+{
+	if     (frontLeft < -100) frontLeft = -100;
+	else if(frontLeft >  100) frontLeft =  100;
+	motors[aftPort] = frontLeft;
+
+	if     (backLeft < -100) backLeft = -100;
+	else if(backLeft >  100) backLeft =  100;
+	motors[forPort] = backLeft;
+
+	if     (frontRight < -100) frontRight = -100;
+	else if(frontRight >  100) frontRight =  100;
+	motors[aftStarboard] = frontRight;
+
+	if     (backRight < -100) backRight = -100;
+	else if(backRight >  100) backRight =  100;
+	motors[forStarboard] = backRight;
+}
+
+void pwm2uchar(vector<float> &motors, unsigned char *motorschar)
+{
+	motorschar[drive1] = (char)(abs(motors[drive1]) * (255/100));
+	if( motors[drive1] < 0 )       {motorschar[drive1] ^= 0x01;}
+	else                           {motorschar[drive1] &= 0xFE;}
+
+	motorschar[drive2] = (char)(abs(motors[drive2]) * (255/100));
+	if( motors[drive2] < 0 )       {motorschar[drive2] ^= 0x01;}
+	else                           {motorschar[drive2] &= 0xFE;}
+
+	motorschar[aftPort] = (char)(abs(motors[aftPort]) * (255/100));
+	if( motors[aftPort] < 0 )      {motorschar[aftPort] ^= 0x01;}
+	else                           {motorschar[aftPort] &= 0xFE;}
+	
+	motorschar[forPort] = (char)(abs(motors[forPort]) * (255/100));
+	if( motors[forPort] < 0 )      {motorschar[forPort] ^= 0x01;}
+	else                           {motorschar[forPort] &= 0xFE;}
+
+	motorschar[aftStarboard] = (char)(abs(motors[aftStarboard]) * (255/100));
+	if( motors[aftStarboard] < 0 ) {motorschar[aftStarboard] ^= 0x01;}
+	else                           {motorschar[aftStarboard] &= 0xFE;}
+	
+	motorschar[forStarboard] = (char)(abs(motors[forStarboard]) * (255/100));
+	if(motors[forStarboard] < 0 ) {motorschar[forStarboard] ^= 0x01;}
+	else                          {motorschar[forStarboard] &= 0xFE;}
 }

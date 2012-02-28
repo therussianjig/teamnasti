@@ -24,7 +24,8 @@ int main()
 	int key2;
 	IplImage* img_full = 0;
 
-	vector<char> motors;
+	vector<float> motors;
+	unsigned char motorschar[6];
 	vector<buoy> greenBuoys;
 	vector<buoy> redBuoys;
 	vector<buoy> yellowBuoys;
@@ -35,10 +36,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture = cvCaptureFromCAM(-1);
-	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+	//CvCapture* g_capture = cvCaptureFromCAM(-1);
+	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
 	#ifndef unix
 	assert(g_capture); //assert is a windows ONLY macro
@@ -68,9 +69,12 @@ int main()
 		
 		// retrieve the captured frame and display it in a window 
 		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
+
 		img_full = cvQueryFrame(g_capture);       //from video
+		if( !img_full ) break; 
 		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
 		cvResize(img_full,img);
+
 		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
 		 if( !img ) break; 
 #ifdef debug
@@ -78,7 +82,7 @@ int main()
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
-		int horizon = img->height/3;
+		int horizon = img->height/2;
 
 		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 
@@ -99,32 +103,33 @@ int main()
 		//findBuoy(img, horizon, 'b', blueBuoys);
 
 		//construct the gates
-		//constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
+		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
 		
 		//build the walls
-		//constructWall(greenBuoys, greenWall);
-		//constructWall(redBuoys, redWall);
-		//constructWall(blueBuoys, blueWall);
+		constructWall(greenBuoys, greenWall);
+		constructWall(redBuoys, redWall);
+		constructWall(blueBuoys, blueWall);
 		 
 		//find the path
-		//findPath(img, gates, path);
+		findPath(img, gates, path);
 
 		//Determine motor signals
-		//navigateChannel(path, motors);
+		navigateChannel(path, motors);
+		for(unsigned int i = 0; i < motors.size(); i++)
+		{
+			//motors[i] = 5;
+			cout<<(int)motors[i]<<"   ";
+			SendByte(cport_nr,char(motors[i]));
+		}
+		cout<<endl;
 
 //#ifdef debug
 		
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
-		//for(unsigned int i = 0; i < motors.size(); i++)
-		//{
-		//	//motors[i] = 5;
-		//	cout<<(int)motors[i]<<"   ";
-		//	SendByte(cport_nr,char(motors[i]));
-		//}
-		//cout<<endl;
-
+		pwm2uchar(motors, motorschar);
+		//SendBuf(cport_nr, motorschar, 6);
 
 
 
@@ -135,7 +140,7 @@ int main()
 		{
 			CvPoint pt = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
 			cvCircle(out, pt, cvRound(greenBuoys[i].radius), CV_RGB(0, 128, 0), 3);
-			cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
+			//cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
 		}
 
 		//draw the red buoys
@@ -160,33 +165,33 @@ int main()
 			cvCircle(out, pt, cvRound(blueBuoys[i].radius), CV_RGB(0, 0, 255), 3);
 		}
 
-		////draw the gates
-		//for(unsigned int i = 0; i < gates.size(); i++)
-		//{
-		//	cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
-		//	//cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
-		//}
+		//draw the gates
+		for(unsigned int i = 0; i < gates.size(); i++)
+		{
+			cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
+			//cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
+		}
 
-		////draw the target path
-		//for(unsigned int i = 0; i < path.size(); i++)
-		//{
-		//	cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
-		////	cout<<path[i].length<<"  "<<path[i].slope<<endl;
-		//}
+		//draw the target path
+		for(unsigned int i = 0; i < path.size(); i++)
+		{
+			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
+		//	cout<<path[i].length<<"  "<<path[i].slope<<endl;
+		}
 		//cout<<endl;
-		//////draw the walls
-		//for(unsigned int i = 0; i < greenWall.size(); i++)
-		//{
-		//	cvLine(out, greenWall[i].nearEnd, greenWall[i].farEnd, CV_RGB(0, 128, 0), 3);
-		//}
-		//for(unsigned int i = 0; i < redWall.size(); i++)
-		//{
-		//	cvLine(out, redWall[i].nearEnd, redWall[i].farEnd, CV_RGB(255, 0, 0), 3);
-		//}
-		//for(unsigned int i = 0; i < blueWall.size(); i++)
-		//{
-		//	cvLine(out, blueWall[i].nearEnd, blueWall[i].farEnd, CV_RGB(0, 0, 255), 3);
-		//}
+		////draw the walls
+		for(unsigned int i = 0; i < greenWall.size(); i++)
+		{
+			cvLine(out, greenWall[i].nearEnd, greenWall[i].farEnd, CV_RGB(0, 128, 0), 3);
+		}
+		for(unsigned int i = 0; i < redWall.size(); i++)
+		{
+			cvLine(out, redWall[i].nearEnd, redWall[i].farEnd, CV_RGB(255, 0, 0), 3);
+		}
+		for(unsigned int i = 0; i < blueWall.size(); i++)
+		{
+			cvLine(out, blueWall[i].nearEnd, blueWall[i].farEnd, CV_RGB(0, 0, 255), 3);
+		}
 		/****************************************************************************/
 		//********************************************************************
 		//********************************************************************
@@ -228,9 +233,9 @@ int main()
 		key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
-		key2=cvWaitKey(-1);
-		if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
-		else if (key2 == 32) {break;}  // Press 'space' to exit program
+		//key2=cvWaitKey(-1);
+		//if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
+		//else if (key2 == 32) {break;}  // Press 'space' to exit program
 	}
 #ifdef debug
 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create

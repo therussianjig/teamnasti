@@ -9,8 +9,9 @@
 #pragma once
 
 
-void throttle(float height, float length, vector<char> &motors);
-void turn( char severity, char direction, vector<char> &motors);
-void mainThrust(int motor1, int motor2, vector<char> &motors);
-void sideThrust(int frontLeft, int backLeft, int frontRight, int backRight, vector<char> &motors);
-void navigateChannel(vector<path> &path, vector<char> &motors);
+void throttle(float PWM, vector<float> &motors);
+void turn( char severity, char direction, vector<float> &motors);
+void mainThrust(float motor1, float motor2, vector<float> &motors);
+void sideThrust(float frontLeft, float backLeft, float frontRight, float backRight, vector<float> &motors);
+void navigateChannel(vector<path> &path, vector<float> &motors);
+void pwm2uchar(vector<float> &motors, unsigned char *motorschar);

@@ -128,8 +128,6 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 		float diameter = 2*radius;
 		float n =0;
 		float total = diameter*diameter;
-		cout<<"blob   ";
-		cout<<x<<"  "<<y<<"  "<<i<<endl;
 ////		for( int k = 0; k < 2*p[2]; k++)
 ////		{
 //			uchar* ptr = (uchar*)(thresholded->imageData  + (int)(y) * thresholded->widthStep);

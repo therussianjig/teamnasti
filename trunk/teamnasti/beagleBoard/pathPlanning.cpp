@@ -95,7 +95,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9);
 	//cvDilate(hsvImg, hsvImg, NULL, 5);
 	cvDilate(thresholded, thresholded, NULL, 3);
-	cvDilate(thresholded, thresholded, NULL, 3);
+	//cvDilate(thresholded, thresholded, NULL, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
 	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
@@ -118,20 +118,18 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	
 	buoys.resize(blobs.GetNumBlobs());
 	int k = 0;
-	for(int i = 0; i < (blobs.GetNumBlobs()-1); i++)
+	for(int i = 0; i < (blobs.GetNumBlobs()); i++)
 	{
-		cout<<blobs.GetNumBlobs()<<endl;
 		//float* p = (float*) cvGetSeqElem(circles, i);
 		float x = (float)(blobs.GetBlob(i)->MinX() + (( blobs.GetBlob(i)->MaxX() - blobs.GetBlob(i)->MinX() ) / 2.0));
 		
 		float y = (float)(blobs.GetBlob(i)->MinY() + (( blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY() ) / 2.0));
-		float radius =  (float)(blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY());
+		float radius =  (float)(blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY())/2;
 		float diameter = 2*radius;
 		float n =0;
 		float total = diameter*diameter;
 		cout<<"blob   ";
 		cout<<x<<"  "<<y<<"  "<<i<<endl;
-		k++;
 ////		for( int k = 0; k < 2*p[2]; k++)
 ////		{
 //			uchar* ptr = (uchar*)(thresholded->imageData  + (int)(y) * thresholded->widthStep);
@@ -146,7 +144,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 			buoys[k].x= x;
 			buoys[k].y = y;
 			buoys[k].radius = radius;
-//			k++;
+			k++;
 //		}
 	}
 
@@ -183,21 +181,21 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	}
 	*/
 	//sort the vector of buoys so that the first listed buoys are the 'closest' buoys
-	//buoys.resize(k);
-	//buoysSorted.resize(k);
-	//buoy buoyTemp;
-	//for(int j = 0; j < k-1; j++)
-	//{
-	//	for(int i = 0; i < k-1; i++)
-	//	{
-	//		if( buoys[i].y < buoys[i+1].y )
-	//		{
-	//			buoyTemp = buoys[i+1];
-	//			buoys[i+1] = buoys[i];
-	//			buoys[i] = buoyTemp;
-	//		}
-	//	}
-	//}
+	buoys.resize(k);
+	buoysSorted.resize(k);
+	buoy buoyTemp;
+	for(int j = 0; j < k-1; j++)
+	{
+		for(int i = 0; i < k-1; i++)
+		{
+			if( buoys[i].y < buoys[i+1].y )
+			{
+				buoyTemp = buoys[i+1];
+				buoys[i+1] = buoys[i];
+				buoys[i] = buoyTemp;
+			}
+		}
+	}
 	//adjust the buoy y location because the ROI sets a new origin at the top left of ROI
 	//the adjustment is needed so the buoys are locates properly relative to the whole image
 	for(int j = 0; j < k; j++)

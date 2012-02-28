@@ -68,10 +68,10 @@ int main()
 		
 		// retrieve the captured frame and display it in a window 
 		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
-		//img_full = cvQueryFrame(g_capture);       //from video
-		//IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
-		//cvResize(img_full,img);
-		IplImage* img = cvLoadImage("presentation.jpg"); //from image
+		img_full = cvQueryFrame(g_capture);       //from video
+		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img);
+		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
 		 if( !img ) break; 
 #ifdef debug
 		cvShowImage( "in", img ); 
@@ -89,13 +89,13 @@ int main()
 		//find the green buoys
 		findBuoy(img, horizon, 'g', greenBuoys);
 
-		////find the red buoys
-		//findBuoy(img, horizon, 'r', redBuoys);
+		//find the red buoys
+		findBuoy(img, horizon, 'r', redBuoys);
 
-		////find the yellow buoys
+		//find the yellow buoys
 		//findBuoy(img, horizon, 'y', yellowBuoys);
 
-		////find the blue buoys
+		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys);
 
 		//construct the gates
@@ -138,27 +138,27 @@ int main()
 			cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
 		}
 
-		////draw the red buoys
-		//for(unsigned int i = 0; i < redBuoys.size(); i++)
-		//{
-		//	CvPoint pt = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-		//	cvCircle(out, pt, cvRound(redBuoys[i].radius), CV_RGB(255, 0, 0), 3);
-		//	//cout<<redBuoys[i].y<<"  b  "<<i<<endl;
-		//}
+		//draw the red buoys
+		for(unsigned int i = 0; i < redBuoys.size(); i++)
+		{
+			CvPoint pt = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+			cvCircle(out, pt, cvRound(redBuoys[i].radius), CV_RGB(255, 0, 0), 3);
+			//cout<<redBuoys[i].y<<"  b  "<<i<<endl;
+		}
 
-		////draw the yellow buoys
-		//for(unsigned int i = 0; i < yellowBuoys.size(); i++)
-		//{
-		//	CvPoint pt = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
-		//	cvCircle(out, pt, cvRound(yellowBuoys[i].radius), CV_RGB(255, 255, 0), 3);
-		//}
+		//draw the yellow buoys
+		for(unsigned int i = 0; i < yellowBuoys.size(); i++)
+		{
+			CvPoint pt = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
+			cvCircle(out, pt, cvRound(yellowBuoys[i].radius), CV_RGB(255, 255, 0), 3);
+		}
 
-		//////draw the blue buoys
-		//for(unsigned int i = 0; i < blueBuoys.size(); i++)
-		//{
-		//	CvPoint pt = cvPoint(cvRound(blueBuoys[i].x), cvRound(blueBuoys[i].y));
-		//	cvCircle(out, pt, cvRound(blueBuoys[i].radius), CV_RGB(0, 0, 255), 3);
-		//}
+		////draw the blue buoys
+		for(unsigned int i = 0; i < blueBuoys.size(); i++)
+		{
+			CvPoint pt = cvPoint(cvRound(blueBuoys[i].x), cvRound(blueBuoys[i].y));
+			cvCircle(out, pt, cvRound(blueBuoys[i].radius), CV_RGB(0, 0, 255), 3);
+		}
 
 		////draw the gates
 		//for(unsigned int i = 0; i < gates.size(); i++)

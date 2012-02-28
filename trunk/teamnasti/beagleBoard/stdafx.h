@@ -14,8 +14,8 @@
 #ifdef unix
 #include </usr/include/opencv/cv.h>
 #include </usr/include/opencv/highgui.h>
-#include </blob/BlobResult.h>
-#include </blob/blob.h>
+#include "blob/BlobResult.h"
+#include "blob/blob.h"
 #include "rs232.h"
 
 #else

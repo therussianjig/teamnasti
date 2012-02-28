@@ -89,14 +89,14 @@ int main()
 		//find the green buoys
 		findBuoy(img, horizon, 'g', greenBuoys);
 
-		//find the red buoys
-		findBuoy(img, horizon, 'r', redBuoys);
+		////find the red buoys
+		//findBuoy(img, horizon, 'r', redBuoys);
 
-		//find the yellow buoys
-		findBuoy(img, horizon, 'y', yellowBuoys);
+		////find the yellow buoys
+		//findBuoy(img, horizon, 'y', yellowBuoys);
 
-		//find the blue buoys
-		findBuoy(img, horizon, 'b', blueBuoys);
+		////find the blue buoys
+		//findBuoy(img, horizon, 'b', blueBuoys);
 
 		//construct the gates
 		//constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
@@ -135,7 +135,7 @@ int main()
 		{
 			CvPoint pt = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
 			cvCircle(out, pt, cvRound(greenBuoys[i].radius), CV_RGB(0, 128, 0), 3);
-			cout<<greenBuoys[i].y<<"     "<<greenBuoys[i].x<<"  "<<i<<endl;
+			cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
 		}
 
 		////draw the red buoys

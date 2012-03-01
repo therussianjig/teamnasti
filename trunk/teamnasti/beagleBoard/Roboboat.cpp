@@ -65,7 +65,7 @@ int main()
 	//have to put this outside the loop, or you will leak memory all over the floor
 	while(1==1)
 	{   
-		SendByte(cport_nr, 'J');
+	//SendByte(cport_nr, 'J');
 		
 		// retrieve the captured frame and display it in a window 
 		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
@@ -115,11 +115,12 @@ int main()
 
 		//Determine motor signals
 		navigateChannel(path, motors);
+		
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
 			//motors[i] = 5;
 			cout<<(int)motors[i]<<"   ";
-			SendByte(cport_nr,char(motors[i]));
+			//SendByte(cport_nr,char(motors[i]));
 		}
 		cout<<endl;
 
@@ -129,7 +130,8 @@ int main()
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		pwm2uchar(motors, motorschar);
-		//SendBuf(cport_nr, motorschar, 6);
+		
+		SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
 		//draw the green buoys
@@ -221,9 +223,9 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		//cvSaveImage(fName, out);
+		cvSaveImage(fName, out);
 		//Show altered image in another window
-		cvShowImage( "out", out );
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

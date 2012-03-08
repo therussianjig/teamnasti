@@ -23,6 +23,7 @@ int main()
 	int key;
 	int key2;
 	IplImage* img_full = 0;
+	IplImage* img_full2 = 0;
 
 	vector<float> motors;
 	unsigned char motorschar[6];
@@ -36,10 +37,11 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	//CvCapture* g_capture = cvCaptureFromCAM(-1);
-	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
-	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
-	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+	CvCapture* g_capture  = cvCreateCameraCapture(0);
+	CvCapture* g_capture2 = cvCreateCameraCapture(3);
+	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
 	#ifndef unix
 	assert(g_capture); //assert is a windows ONLY macro
@@ -72,11 +74,25 @@ int main()
 
 		img_full = cvQueryFrame(g_capture);       //from video
 		if( !img_full ) break; 
-		IplImage* img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
-		cvResize(img_full,img);
+		IplImage* img1 =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img1);
+
+		img_full2 = cvQueryFrame(g_capture2);       //from video
+		if( !img_full2 ) break; 
+		IplImage* img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
+		cvResize(img_full2,img2);
 
 		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
-		 if( !img ) break; 
+		 if( !img1 || !img2 ) break; 
+		 
+		 CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
+		 IplImage* img =  cvCreateImage(size, img1->depth, img1->nChannels);
+		 cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
+		 cvCopy(img1, img, NULL);
+		 cvResetImageROI(img);
+		 cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
+		 cvCopy(img2, img, NULL);
+		 cvResetImageROI(img);
 #ifdef debug
 		cvShowImage( "in", img ); 
 #endif
@@ -97,7 +113,7 @@ int main()
 		findBuoy(img, horizon, 'r', redBuoys);
 
 		//find the yellow buoys
-		//findBuoy(img, horizon, 'y', yellowBuoys);
+		findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys);
@@ -223,9 +239,9 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		cvSaveImage(fName, out);
+		//cvSaveImage(fName, out);
 		//Show altered image in another window
-		//cvShowImage( "out", out );
+		cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

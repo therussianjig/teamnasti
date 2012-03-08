@@ -17,6 +17,9 @@
 using namespace std;
 using namespace cv;
 
+CRITICAL_SECTION crSec;
+
+
 int main()
 {
 	int imgCount = 1;
@@ -24,6 +27,8 @@ int main()
 	int key2;
 	IplImage* img_full = 0;
 	IplImage* img_full2 = 0;
+	IplImage* img = 0;
+	IplImage* img2 = 0;
 
 	vector<float> motors;
 	unsigned char motorschar[6];
@@ -37,14 +42,15 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture  = cvCreateCameraCapture(0);
-	CvCapture* g_capture2 = cvCreateCameraCapture(3);
+	CvCapture* g_capture  = cvCaptureFromCAM(2);
+	//cvWaitKey(1000);
+	//CvCapture* g_capture2 = cvCaptureFromCAM(0);
 	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
 	#ifndef unix
-	assert(g_capture); //assert is a windows ONLY macro
+	//assert(g_capture); //assert is a windows ONLY macro
 	#endif
 
 	motors.resize(6);
@@ -53,7 +59,7 @@ int main()
     int bdrate=9600;
 	OpenComport(cport_nr, bdrate);
 
-    if(!cvGrabFrame(g_capture)) // capture a frame
+    if(!cvGrabFrame(g_capture) /*|| !cvGrabFrame(g_capture2)*/) // capture a frame
 	{             
             printf("Could not grab a frame\n\7");
             exit(0);
@@ -68,31 +74,30 @@ int main()
 	while(1==1)
 	{   
 	//SendByte(cport_nr, 'J');
-		
 		// retrieve the captured frame and display it in a window 
 		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
 
 		img_full = cvQueryFrame(g_capture);       //from video
 		if( !img_full ) break; 
-		IplImage* img1 =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
-		cvResize(img_full,img1);
+		img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img);
 
-		img_full2 = cvQueryFrame(g_capture2);       //from video
-		if( !img_full2 ) break; 
-		IplImage* img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
-		cvResize(img_full2,img2);
+		//img_full2 = cvQueryFrame(g_capture2);       //from video
+		//if( !img_full2 ) break; 
+		// img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
+		//cvResize(img_full2,img2);
 
 		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
-		 if( !img1 || !img2 ) break; 
+		 //if( !img1 || !img2 ) break; 
 		 
-		 CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
-		 IplImage* img =  cvCreateImage(size, img1->depth, img1->nChannels);
-		 cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
-		 cvCopy(img1, img, NULL);
-		 cvResetImageROI(img);
-		 cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
-		 cvCopy(img2, img, NULL);
-		 cvResetImageROI(img);
+		 //CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
+		 //IplImage* img =  cvCreateImage(size, img1->depth, img1->nChannels);
+		 //cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
+		 //cvCopy(img1, img, NULL);
+		 //cvResetImageROI(img);
+		 //cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
+		 //cvCopy(img2, img, NULL);
+		 //cvResetImageROI(img);
 #ifdef debug
 		cvShowImage( "in", img ); 
 #endif
@@ -113,7 +118,7 @@ int main()
 		findBuoy(img, horizon, 'r', redBuoys);
 
 		//find the yellow buoys
-		findBuoy(img, horizon, 'y', yellowBuoys);
+		//findBuoy(img, horizon, 'y', yellowBuoys);
 
 		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys);
@@ -258,6 +263,7 @@ int main()
 	//cvReleaseImage(&img); //I guess I don't need to do this 
 #endif
 	cvReleaseCapture(&g_capture); //Must release capture device or mem leak
+	//cvReleaseCapture(&g_capture2);
 	//Do not release the trackbar before the capture. The code will break. 
 	return 0;
 }

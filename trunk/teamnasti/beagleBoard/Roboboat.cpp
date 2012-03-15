@@ -17,8 +17,9 @@
 using namespace std;
 using namespace cv;
 
+#ifndef unix
 CRITICAL_SECTION crSec;
-
+#endif
 
 int main()
 {
@@ -42,10 +43,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture  = cvCaptureFromCAM(2);
+	//CvCapture* g_capture  = cvCaptureFromCAM(-1);
 	//cvWaitKey(1000);
 	//CvCapture* g_capture2 = cvCaptureFromCAM(0);
-	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -73,7 +74,7 @@ int main()
 	//have to put this outside the loop, or you will leak memory all over the floor
 	while(1==1)
 	{   
-	//SendByte(cport_nr, 'J');
+	SendByte(cport_nr, 'J');
 		// retrieve the captured frame and display it in a window 
 		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
 
@@ -246,7 +247,7 @@ int main()
 
 		//cvSaveImage(fName, out);
 		//Show altered image in another window
-		cvShowImage( "out", out );
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

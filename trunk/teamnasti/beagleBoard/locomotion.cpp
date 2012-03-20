@@ -1,9 +1,9 @@
 /*****************************************************************************************
 * Author: Terry Max Christy
-* Modified: Jeremy Borgman 3/20/2012
+* Modified: Jeremy Borgman 2/21/2012
 * Bradley University 
 * Nautical Autonomous System with Task Integration (code name NASTI)
-* Date written: 10/20/11 Last Modified: 3/20/12
+* Date written: 10/20/11 Last Modified: 1/26/12
 *****************************************************************************************/
 #ifdef unix
 #include <iostream>
@@ -17,8 +17,8 @@ void navigateChannel(vector<path> &path, vector<float> &motors)
 {
 	float closingOnGate = path[0].height/4 ;
 	float throttlePWM = 0;
-	float closingPWM  = 25;
-	float PWMoffset = 25;
+	float closingPWM  = 60;
+	float PWMoffset = 60;
 	char direction = 'N';
 	char severity = 'N';
 
@@ -69,41 +69,16 @@ void navigateChannel(vector<path> &path, vector<float> &motors)
 	}
 
 	turn(severity, direction, motors);
-	throttle(throttlePWM, severity, direction, motors);
+	throttle(throttlePWM, motors);
 }
 
-void throttle(float PWM, char severity, char direction, vector<float> &motors)
-{	
-	float leftPWM = 0;
-	float rightPWM = 0;
-	
-	
-	if (direction == 'L') {
-		if (severity=='H') {
-			leftPWM = PWM - PWM * 0.4;
-		}
-		
-		else {
-			leftPWM = PWM - PWM * 0.2;
-		}
-	}
-	
-	else {
-	
-	if (severity=='H') {
-			rightPWM = PWM - PWM * 0.4;
-		}
-		
-		else {
-			rightPWM = PWM - PWM * 0.2;
-		}
-	}
-	mainThrust(leftPWM, rightPWM, motors);
+void throttle(float PWM, vector<float> &motors)
+{
+	mainThrust(PWM, PWM, motors);
 }
 
 /* 
-* Currently performs a pivot motion using only the side thrusters. LIES it uses differential drive
-* also. 
+* Currently performs a pivot motion using only the side thrusters
 */
 void turn( char severity, char direction, vector<float> &motors)
 {
@@ -155,26 +130,26 @@ void sideThrust(float frontLeft, float backLeft, float frontRight, float backRig
 void pwm2uchar(vector<float> &motors, unsigned char *motorschar)
 {
 	motorschar[drive1] = (char)(abs(motors[drive1]) * (255/100));
-	if( motors[drive1] < 0 )       {motorschar[drive1] ^= 0x01;}
+	if( motors[drive1] > 0 )       {motorschar[drive1] |= 0x01;}
 	else                           {motorschar[drive1] &= 0xFE;}
 
 	motorschar[drive2] = (char)(abs(motors[drive2]) * (255/100));
-	if( motors[drive2] < 0 )       {motorschar[drive2] ^= 0x01;}
+	if( motors[drive2] > 0 )       {motorschar[drive2] |= 0x01;}
 	else                           {motorschar[drive2] &= 0xFE;}
 
 	motorschar[aftPort] = (char)(abs(motors[aftPort]) * (255/100));
-	if( motors[aftPort] < 0 )      {motorschar[aftPort] ^= 0x01;}
+	if( motors[aftPort] < 0 )      {motorschar[aftPort] |= 0x01;}
 	else                           {motorschar[aftPort] &= 0xFE;}
 	
 	motorschar[forPort] = (char)(abs(motors[forPort]) * (255/100));
-	if( motors[forPort] < 0 )      {motorschar[forPort] ^= 0x01;}
+	if( motors[forPort] < 0 )      {motorschar[forPort] |= 0x01;}
 	else                           {motorschar[forPort] &= 0xFE;}
 
 	motorschar[aftStarboard] = (char)(abs(motors[aftStarboard]) * (255/100));
-	if( motors[aftStarboard] < 0 ) {motorschar[aftStarboard] ^= 0x01;}
+	if( motors[aftStarboard] < 0 ) {motorschar[aftStarboard] |= 0x01;}
 	else                           {motorschar[aftStarboard] &= 0xFE;}
 	
 	motorschar[forStarboard] = (char)(abs(motors[forStarboard]) * (255/100));
-	if(motors[forStarboard] < 0 ) {motorschar[forStarboard] ^= 0x01;}
+	if(motors[forStarboard] < 0 ) {motorschar[forStarboard] |= 0x01;}
 	else                          {motorschar[forStarboard] &= 0xFE;}
 }

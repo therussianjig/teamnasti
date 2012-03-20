@@ -1,9 +1,9 @@
 /*****************************************************************************************
 * Author: Terry Max Christy
-* Modified: Jeremy Borgman 2/21/2012
+* Modified: Jeremy Borgman 3/20/2012
 * Bradley University 
 * Nautical Autonomous System with Task Integration (code name NASTI)
-* Date written: 10/20/11 Last Modified: 1/26/12
+* Date written: 10/20/11 Last Modified: 3/20/12
 *****************************************************************************************/
 #ifdef unix
 #include <iostream>
@@ -69,16 +69,41 @@ void navigateChannel(vector<path> &path, vector<float> &motors)
 	}
 
 	turn(severity, direction, motors);
-	throttle(throttlePWM, motors);
+	throttle(throttlePWM, severity, direction, motors);
 }
 
-void throttle(float PWM, vector<float> &motors)
-{
-	mainThrust(PWM, PWM, motors);
+void throttle(float PWM, char severity, char direction, vector<float> &motors)
+{	
+	float leftPWM = 0;
+	float rightPWM = 0;
+	
+	
+	if (direction == 'L') {
+		if (severity=='H') {
+			leftPWM = PWM - PWM * 0.4;
+		}
+		
+		else {
+			leftPWM = PWM - PWM * 0.2;
+		}
+	}
+	
+	else {
+	
+	if (severity=='H') {
+			rightPWM = PWM - PWM * 0.4;
+		}
+		
+		else {
+			rightPWM = PWM - PWM * 0.2;
+		}
+	}
+	mainThrust(leftPWM, rightPWM, motors);
 }
 
 /* 
-* Currently performs a pivot motion using only the side thrusters
+* Currently performs a pivot motion using only the side thrusters. LIES it uses differential drive
+* also. 
 */
 void turn( char severity, char direction, vector<float> &motors)
 {

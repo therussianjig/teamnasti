@@ -1,6 +1,9 @@
 
 //! Disable warnings referred to 255 character truncation for the std:map
+
+#ifndef unix
 #pragma warning( disable : 4786 ) 
+#endif
 
 #ifndef BLOB_PROPERTIES_H_INCLUDED
 #define BLOB_PROPERTIES_H_INCLUDED

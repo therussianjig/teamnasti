@@ -4,7 +4,9 @@
 // Nautical Autonomous System with Task Integration (code name NASTI)
 // Date written: 10/20/11 Last Modified: 10/20/11
 *****************************************************************************************/
+#ifndef unix
 #pragma once
+#endif
 using namespace std;
 using namespace cv; 
 

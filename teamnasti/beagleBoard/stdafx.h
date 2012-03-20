@@ -4,8 +4,9 @@
 // *****************************************************************
 // Include this file in all other .cpp files in the program 
 
+#ifndef unix
 #pragma once
-#pragma warning( disable : 4267 4996)
+#endif
 
 #include <stdlib.h>
 #include <math.h>
@@ -19,6 +20,7 @@
 #include "rs232.h"
 
 #else
+#pragma warning( disable : 4267 4996)
 #include <\opencv\include\opencv\cv.h>
 #include <\opencv\include\opencv\highgui.h>
 #include <\cvblobslib\BlobResult.h>

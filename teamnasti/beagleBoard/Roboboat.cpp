@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#define saveImage 1
 #endif
 
 #include "stdafx.h"
@@ -244,10 +245,16 @@ int main()
 		strcat(fName, str);
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
-
+		
+		#ifdef saveImage
 		cvSaveImage(fName, out);
+		#endif
 		//Show altered image in another window
-		//cvShowImage( "out", out );
+		
+		#ifdef debug
+		cvShowImage( "out", out );
+		#endif
+		
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

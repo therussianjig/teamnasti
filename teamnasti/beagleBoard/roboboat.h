@@ -6,7 +6,5 @@
 *****************************************************************************************/
 // #pragma once ensures that any file that is inlcuded after it is only included in the 
 // overall project once.
-#ifndef unix
 #pragma once
-#endif
 

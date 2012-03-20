@@ -11,7 +11,6 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#define saveImage 1
 #endif
 
 #include "stdafx.h"
@@ -44,10 +43,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	//CvCapture* g_capture  = cvCaptureFromCAM(-1);
+	CvCapture* g_capture  = cvCaptureFromCAM(-1);
 	//cvWaitKey(1000);
 	//CvCapture* g_capture2 = cvCaptureFromCAM(0);
-	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -245,16 +244,10 @@ int main()
 		strcat(fName, str);
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
-		
-		#ifdef saveImage
+
 		cvSaveImage(fName, out);
-		#endif
 		//Show altered image in another window
-		
-		#ifdef debug
-		cvShowImage( "out", out );
-		#endif
-		
+		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

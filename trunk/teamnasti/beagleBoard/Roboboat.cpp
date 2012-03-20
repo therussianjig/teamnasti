@@ -56,7 +56,7 @@ int main()
 
 	motors.resize(6);
 	
-	int cport_nr=2;       // /dev/ttyS2 (COM3 on windows)
+	int cport_nr=16;       // /dev/ttyS2 (COM3 on windows)
     int bdrate=9600;
 	OpenComport(cport_nr, bdrate);
 
@@ -245,7 +245,7 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
-		//cvSaveImage(fName, out);
+		cvSaveImage(fName, out);
 		//Show altered image in another window
 		//cvShowImage( "out", out );
 		cvReleaseImage( &out );//clean up after thyself

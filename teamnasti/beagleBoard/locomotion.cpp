@@ -17,6 +17,8 @@ void navigateChannel(vector<path> &path, vector<float> &motors)
 {
 	float closingOnGate = path[0].height/4 ;
 	float throttlePWM = 0;
+	float LturnOffset = 0;
+	float RturnOffset = 0;
 	float closingPWM  = 60;
 	float PWMoffset = 60;
 	char direction = 'N';
@@ -67,9 +69,36 @@ void navigateChannel(vector<path> &path, vector<float> &motors)
 		//set throttle value proportional to the length of the path line
 		throttlePWM = (path[0].length / path[0].height)*100 + PWMoffset;
 	}
-
+	if(direction == 'L')
+	{
+		if(severity == 'H')
+		{
+			LturnOffset = PWMoffset;
+		}
+		else 
+		{
+			LturnOffset = PWMoffset/2;
+		}
+	}
+	else if(direction == 'R')
+	{
+		if(severity == 'H')
+		{
+			RturnOffset = PWMoffset;
+		}
+		else 
+		{
+			RturnOffset = PWMoffset/2;
+		}
+	}
+	else 
+	{
+		LturnOffset = 0;
+		RturnOffset = 0;
+	}
 	turn(severity, direction, motors);
-	throttle(throttlePWM, motors);
+	//throttle(throttlePWM, motors);
+	mainThrust(throttlePWM - LturnOffset, throttlePWM - RturnOffset, motors);
 }
 
 void throttle(float PWM, vector<float> &motors)
@@ -88,9 +117,9 @@ void turn( char severity, char direction, vector<float> &motors)
 	else                    {PWM =   0;}
 
 	if( direction == 'L' ) 
-	{sideThrust(-PWM, PWM, -PWM, PWM, motors);}
+	{sideThrust(-PWM, PWM, PWM, -PWM, motors);}
 	else                  
-	{sideThrust(PWM, -PWM, PWM, -PWM, motors);}
+	{sideThrust(PWM, -PWM, -PWM, PWM, motors);}
 }
 
 void mainThrust(float motor1, float motor2, vector<float> &motors)
@@ -129,27 +158,27 @@ void sideThrust(float frontLeft, float backLeft, float frontRight, float backRig
 
 void pwm2uchar(vector<float> &motors, unsigned char *motorschar)
 {
-	motorschar[drive1] = (char)(abs(motors[drive1]) * (255/100));
+	motorschar[drive1] = (char)(abs(motors[drive1]) * (255.0/100.0));
 	if( motors[drive1] > 0 )       {motorschar[drive1] |= 0x01;}
 	else                           {motorschar[drive1] &= 0xFE;}
 
-	motorschar[drive2] = (char)(abs(motors[drive2]) * (255/100));
+	motorschar[drive2] = (char)(abs(motors[drive2]) * (255.0/100.0));
 	if( motors[drive2] > 0 )       {motorschar[drive2] |= 0x01;}
 	else                           {motorschar[drive2] &= 0xFE;}
 
-	motorschar[aftPort] = (char)(abs(motors[aftPort]) * (255/100));
+	motorschar[aftPort] = (char)(abs(motors[aftPort]) * (255.0/100.0));
 	if( motors[aftPort] < 0 )      {motorschar[aftPort] |= 0x01;}
 	else                           {motorschar[aftPort] &= 0xFE;}
 	
-	motorschar[forPort] = (char)(abs(motors[forPort]) * (255/100));
+	motorschar[forPort] = (char)(abs(motors[forPort]) * (255.0/100.0));
 	if( motors[forPort] < 0 )      {motorschar[forPort] |= 0x01;}
 	else                           {motorschar[forPort] &= 0xFE;}
 
-	motorschar[aftStarboard] = (char)(abs(motors[aftStarboard]) * (255/100));
+	motorschar[aftStarboard] = (char)(abs(motors[aftStarboard]) * (255.0/100.0));
 	if( motors[aftStarboard] < 0 ) {motorschar[aftStarboard] |= 0x01;}
 	else                           {motorschar[aftStarboard] &= 0xFE;}
 	
-	motorschar[forStarboard] = (char)(abs(motors[forStarboard]) * (255/100));
+	motorschar[forStarboard] = (char)(abs(motors[forStarboard]) * (255.0/100.0));
 	if(motors[forStarboard] < 0 ) {motorschar[forStarboard] |= 0x01;}
 	else                          {motorschar[forStarboard] &= 0xFE;}
 }

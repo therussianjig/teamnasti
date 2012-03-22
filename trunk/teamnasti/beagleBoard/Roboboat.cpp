@@ -43,10 +43,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE; 
-	CvCapture* g_capture  = cvCaptureFromCAM(-1);
+	//CvCapture* g_capture  = cvCaptureFromCAM(-1);
 	//cvWaitKey(1000);
 	//CvCapture* g_capture2 = cvCaptureFromCAM(0);
-	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -152,8 +152,13 @@ int main()
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		pwm2uchar(motors, motorschar);
-		
-		SendBuf(cport_nr, motorschar, 6);
+		SendByte(cport_nr,255);
+		SendByte(cport_nr,255);
+		SendByte(cport_nr,0);
+		SendByte(cport_nr,0);
+		SendByte(cport_nr,255);
+		SendByte(cport_nr,255);
+		//SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
 		//draw the green buoys

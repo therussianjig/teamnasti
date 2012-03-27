@@ -13,14 +13,12 @@
 using namespace std;
 using namespace cv;
 
-void navigateChannel(vector<path> &path, vector<float> &motors)
+void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset) 
 {
-	float closingOnGate = path[0].height/4 ;
+	float closingOnGate = path[0].height/closingOnGateDen;
 	float throttlePWM = 0;
 	float LturnOffset = 0;
 	float RturnOffset = 0;
-	float closingPWM  = 60;
-	float PWMoffset = 60;
 	char direction = 'N';
 	char severity = 'N';
 

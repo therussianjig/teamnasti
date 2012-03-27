@@ -13,5 +13,5 @@ void throttle(float PWM, vector<float> &motors);
 void turn( char severity, char direction, vector<float> &motors);
 void mainThrust(float motor1, float motor2, vector<float> &motors);
 void sideThrust(float frontLeft, float backLeft, float frontRight, float backRight, vector<float> &motors);
-void navigateChannel(vector<path> &path, vector<float> &motors);
+void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset);
 void pwm2uchar(vector<float> &motors, unsigned char *motorschar);

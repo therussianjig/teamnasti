@@ -23,13 +23,18 @@ CRITICAL_SECTION crSec;
 
 int main()
 {
+	CvCapture* g_capture  = 0;
+	CvCapture* g_capture2 = 0;
+
 	int imgCount = 1;
 	int key;
-	int key2;
+	char key2;
 	IplImage* img_full = 0;
 	IplImage* img_full2 = 0;
 	IplImage* img = 0;
+	IplImage* img1 = 0;
 	IplImage* img2 = 0;
+	IplImage* out = 0;
 
 	vector<float> motors;
 	unsigned char motorschar[6];
@@ -42,11 +47,40 @@ int main()
 	vector<wall> greenWall;
 	vector<wall> redWall;
 	vector<wall> blueWall;
-	bool RedRightReturn = FALSE; 
-	//CvCapture* g_capture  = cvCaptureFromCAM(-1);
-	//cvWaitKey(1000);
-	//CvCapture* g_capture2 = cvCaptureFromCAM(0);
-	CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	bool RedRightReturn = FALSE;
+	bool oneCAM = FALSE;
+
+	float closingOnGateDen = 1.0;
+	float closingPWM  = 60.0;
+	float PWMoffset = 60.0;
+
+	cout<<"Closing on Gate Denominator: ";
+	cin>>closingOnGateDen;
+	if(closingOnGateDen <=1 ) closingOnGateDen = 1;
+	else if (closingOnGateDen > 100) closingOnGateDen = 100;
+	else closingOnGateDen = closingOnGateDen;
+
+	cout<<endl<<"Closing PWM: ";
+	cin>>closingPWM;
+	if(closingPWM <=0 ) closingPWM = 10;
+	else if (closingPWM > 100) closingPWM = 100;
+	else closingPWM = closingPWM;
+
+	cout<<endl<<"PWM offset: ";
+	cin>>PWMoffset;
+	if(PWMoffset <=0 ) PWMoffset = 10;
+	else if (PWMoffset > 100) PWMoffset = 100;
+	else PWMoffset = PWMoffset;
+
+	cout<<endl<<"One Camera? ";
+	cin>>key2;
+	if(key2 == 'y') oneCAM = TRUE;
+	else oneCAM = FALSE;
+
+	g_capture  = cvCaptureFromCAM(-1);
+	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
+	else g_capture2 = 0x0;
+	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -74,31 +108,43 @@ int main()
 	//have to put this outside the loop, or you will leak memory all over the floor
 	while(1==1)
 	{   
-	SendByte(cport_nr, 'J');
-		// retrieve the captured frame and display it in a window 
-		//IplImage* img =cvRetrieveFrame(g_capture);   //from camera
-
-		img_full = cvQueryFrame(g_capture);       //from video
-		if( !img_full ) break; 
-		img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
-		cvResize(img_full,img);
-
-		//img_full2 = cvQueryFrame(g_capture2);       //from video
-		//if( !img_full2 ) break; 
-		// img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
-		//cvResize(img_full2,img2);
-
+	//SendByte(cport_nr, 'J');
+		// retrieve the captured frame and display it in a window
 		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
-		 //if( !img1 || !img2 ) break; 
+		//IplImage* img1 =cvRetrieveFrame(g_capture);   //from camera
+		//if( !img1 ) break;
+		
+		img_full = cvRetrieveFrame(g_capture);       //from video/camera
+		if( !img_full ) break; 
+		img1 =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img1);
+#ifdef debug
+		cvNamedWindow( "show",CV_WINDOW_AUTOSIZE);
+		cvShowImage( "show", img1 );
+#endif
+		if(oneCAM == FALSE)
+		{
+			img_full2 = cvQueryFrame(g_capture2);       //from video/camera2 
+			if( !img_full2 ) break; 
+			img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
+			cvResize(img_full2,img2);
+
+			if( !img1 || !img2 ) break; 
 		 
-		 //CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
-		 //IplImage* img =  cvCreateImage(size, img1->depth, img1->nChannels);
-		 //cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
-		 //cvCopy(img1, img, NULL);
-		 //cvResetImageROI(img);
-		 //cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
-		 //cvCopy(img2, img, NULL);
-		 //cvResetImageROI(img);
+			CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
+			img =  cvCreateImage(size, img1->depth, img1->nChannels);
+			cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
+			cvCopy(img1, img, NULL);
+			cvResetImageROI(img);
+			cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
+			cvCopy(img2, img, NULL);
+			cvResetImageROI(img);
+		}
+		else
+		{
+			img =  cvCreateImage(cvGetSize(img1), img1->depth, img1->nChannels);
+			cvCopy(img1, img, NULL);
+		}
 #ifdef debug
 		cvShowImage( "in", img ); 
 #endif
@@ -106,7 +152,7 @@ int main()
 		//********************************************************************
 		int horizon = img->height/2;
 
-		IplImage* out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
+		out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 
 		cvCopy(img, out, NULL);
 
@@ -136,7 +182,7 @@ int main()
 		findPath(img, gates, path);
 
 		//Determine motor signals
-		navigateChannel(path, motors);
+		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset);
 		
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
@@ -152,13 +198,13 @@ int main()
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		pwm2uchar(motors, motorschar);
-		SendByte(cport_nr,255);
-		SendByte(cport_nr,255);
-		SendByte(cport_nr,0);
-		SendByte(cport_nr,0);
-		SendByte(cport_nr,255);
-		SendByte(cport_nr,255);
-		//SendBuf(cport_nr, motorschar, 6);
+		//SendByte(cport_nr,255);
+		//SendByte(cport_nr,255);
+		//SendByte(cport_nr,0);
+		//SendByte(cport_nr,0);
+		//SendByte(cport_nr,255);
+		//SendByte(cport_nr,255);
+		SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
 		//draw the green buoys
@@ -250,9 +296,13 @@ int main()
 		strcat(fName, ".jpeg"); /* add the extension */
 		imgCount++;
 
+#ifdef unix
 		cvSaveImage(fName, out);
+#endif
 		//Show altered image in another window
-		//cvShowImage( "out", out );
+#ifdef debug
+		cvShowImage( "out", out );
+#endif
 		cvReleaseImage( &out );//clean up after thyself
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
@@ -266,6 +316,7 @@ int main()
 #ifdef debug
 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create
 	cvDestroyWindow("out");
+	cvDestroyWindow( "show" );
 	//cvReleaseImage(&img); //I guess I don't need to do this 
 #endif
 	cvReleaseCapture(&g_capture); //Must release capture device or mem leak

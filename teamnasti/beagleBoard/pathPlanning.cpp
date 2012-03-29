@@ -284,6 +284,20 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 	return(0);
 }
 
+bool redRightReturn(vector<gate> &gates)
+{
+	char redRightCount = 0;
+	for(unsigned int i = 0; i < gates.size(); i++)
+	{
+		if(gates[i].red.x > gates[i].green.y) redRightCount++;
+		else redRightCount = redRightCount;
+	}
+	if(gates.size() > 0) redRightCount = redRightCount/gates.size();
+	else redRightCount = 0;
+	if(redRightCount >= 1.0) return(TRUE);
+	else return(FALSE);
+}
+
 int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 {
 	int x, y;
@@ -321,6 +335,7 @@ int findPath(IplImage *in, vector<gate> &gates, vector<path> &path)
 	}
 	return(0);
 }
+
 int constructWall(vector<buoy> &buoys, vector<wall> &walls)
 {
 	if(buoys.size() > 0)

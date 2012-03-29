@@ -377,3 +377,30 @@ IplImage* addROI(IplImage* in, int horizon)
 	//// out = doPyrDown(out, filter);
 	//cvReleaseImage(&greenBuoy);
 // HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS 
+
+//using two cameras 3/29/2012
+//*******************************************************************************************************************************************
+		//if(oneCAM == FALSE)
+		//{
+		//	img_full2 = cvQueryFrame(g_capture2);       //from video/camera2 
+		//	if( !img_full2 ) break; 
+		//	img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
+		//	cvResize(img_full2,img2);
+
+		//	if( !img1 || !img2 ) break; 
+		// 
+		//	CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
+		//	img =  cvCreateImage(size, img1->depth, img1->nChannels);
+		//	cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
+		//	cvCopy(img1, img, NULL);
+		//	cvResetImageROI(img);
+		//	cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
+		//	cvCopy(img2, img, NULL);
+		//	cvResetImageROI(img);
+		//}
+		//else
+		//{
+		//	img =  cvCreateImage(cvGetSize(img1), img1->depth, img1->nChannels);
+		//	cvCopy(img1, img, NULL);
+		//}
+//*******************************************************************************************************************************************

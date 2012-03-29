@@ -28,7 +28,7 @@ int main()
 
 	int imgCount = 1;
 	int key;
-	char key2;
+	//char key2;
 	IplImage* img_full = 0;
 	IplImage* img_full2 = 0;
 	IplImage* img = 0;
@@ -50,27 +50,17 @@ int main()
 	bool RedRightReturn = FALSE;
 	bool oneCAM = FALSE;
 
+	char lighting = 0;
+
 	float closingOnGateDen = 1.0;
 	float closingPWM  = 60.0;
 	float PWMoffset = 60.0;
+	float maxThrottle = 100.0;
+	float diffCoef = 1.0;
+	float leftOff = 1.0;
+	float rightOff = 1.0;
 
-	cout<<"Closing on Gate Denominator: ";
-	cin>>closingOnGateDen;
-	if(closingOnGateDen <=1 ) closingOnGateDen = 1;
-	else if (closingOnGateDen > 100) closingOnGateDen = 100;
-	else closingOnGateDen = closingOnGateDen;
-
-	cout<<endl<<"Closing PWM: ";
-	cin>>closingPWM;
-	if(closingPWM <=0 ) closingPWM = 10;
-	else if (closingPWM > 100) closingPWM = 100;
-	else closingPWM = closingPWM;
-
-	cout<<endl<<"PWM offset: ";
-	cin>>PWMoffset;
-	if(PWMoffset <=0 ) PWMoffset = 10;
-	else if (PWMoffset > 100) PWMoffset = 100;
-	else PWMoffset = PWMoffset;
+	inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 
 	//cout<<endl<<"One Camera? ";
 	//cin>>key2;
@@ -82,7 +72,7 @@ int main()
 	//if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	//else g_capture2 = 0x0;
 	 
-	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
+	//g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 	
@@ -112,41 +102,21 @@ int main()
 	{   
 	//SendByte(cport_nr, 'J');
 		// retrieve the captured frame and display it in a window
-		//IplImage* img = cvLoadImage("presentation.jpg"); //from image
+		//img = cvLoadImage("high.jpeg"); //from image
 		//IplImage* img1 =cvRetrieveFrame(g_capture);   //from camera
 		//if( !img1 ) break;
 		
-		img_full = cvRetrieveFrame(g_capture);       //from video/camera
+		img_full = cvQueryFrame(g_capture);       //from video/camera
 		if( !img_full ) break; 
 		img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
 		cvResize(img_full,img);
-#ifdef debug
-		cvNamedWindow( "show",CV_WINDOW_AUTOSIZE);
-		cvShowImage( "show", img1 );
-#endif
-		//if(oneCAM == FALSE)
-		//{
-		//	img_full2 = cvQueryFrame(g_capture2);       //from video/camera2 
-		//	if( !img_full2 ) break; 
-		//	img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
-		//	cvResize(img_full2,img2);
+//#ifdef debug
+//		cvNamedWindow( "show",CV_WINDOW_AUTOSIZE);
+//		cvShowImage( "show", img );
+//#endif
 
-		//	if( !img1 || !img2 ) break; 
-		// 
-		//	CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
-		//	img =  cvCreateImage(size, img1->depth, img1->nChannels);
-		//	cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
-		//	cvCopy(img1, img, NULL);
-		//	cvResetImageROI(img);
-		//	cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
-		//	cvCopy(img2, img, NULL);
-		//	cvResetImageROI(img);
-		//}
-		//else
-		//{
-		//	img =  cvCreateImage(cvGetSize(img1), img1->depth, img1->nChannels);
-		//	cvCopy(img1, img, NULL);
-		//}
+		//(Insert) Using two Cameras 3/29/2012
+
 #ifdef debug
 		cvShowImage( "in", img ); 
 #endif
@@ -161,20 +131,23 @@ int main()
 		
 		
 		//find the green buoys
-		findBuoy(img, horizon, 'g', greenBuoys);
+		findBuoy(img, horizon, 'g', greenBuoys, lighting);
 
 		//find the red buoys
-		findBuoy(img, horizon, 'r', redBuoys);
+		findBuoy(img, horizon, 'r', redBuoys, lighting);
 
 		//find the yellow buoys
-		//findBuoy(img, horizon, 'y', yellowBuoys);
+		//findBuoy(img, horizon, 'y', yellowBuoys, lighting);
 
 		//find the blue buoys
-		//findBuoy(img, horizon, 'b', blueBuoys);
+		//findBuoy(img, horizon, 'b', blueBuoys, lighting);
 
 		//construct the gates
 		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
 		
+		//determine leaving port/return to port
+		RedRightReturn = redRightReturn(gates);
+
 		//build the walls
 		constructWall(greenBuoys, greenWall);
 		constructWall(redBuoys, redWall);
@@ -184,7 +157,7 @@ int main()
 		findPath(img, gates, path);
 
 		//Determine motor signals
-		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset);
+		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
@@ -209,66 +182,9 @@ int main()
 		SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
-		//draw the green buoys
-		for(unsigned int i = 0; i < greenBuoys.size(); i++)
-		{
-			CvPoint pt = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-			cvCircle(out, pt, cvRound(greenBuoys[i].radius), CV_RGB(0, 128, 0), 3);
-			//cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
-		}
-
-		//draw the red buoys
-		for(unsigned int i = 0; i < redBuoys.size(); i++)
-		{
-			CvPoint pt = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-			cvCircle(out, pt, cvRound(redBuoys[i].radius), CV_RGB(255, 0, 0), 3);
-			//cout<<redBuoys[i].y<<"  b  "<<i<<endl;
-		}
-
-		//draw the yellow buoys
-		for(unsigned int i = 0; i < yellowBuoys.size(); i++)
-		{
-			CvPoint pt = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
-			cvCircle(out, pt, cvRound(yellowBuoys[i].radius), CV_RGB(255, 255, 0), 3);
-		}
-
-		////draw the blue buoys
-		for(unsigned int i = 0; i < blueBuoys.size(); i++)
-		{
-			CvPoint pt = cvPoint(cvRound(blueBuoys[i].x), cvRound(blueBuoys[i].y));
-			cvCircle(out, pt, cvRound(blueBuoys[i].radius), CV_RGB(0, 0, 255), 3);
-		}
-
-		//draw the gates
-		for(unsigned int i = 0; i < gates.size(); i++)
-		{
-			cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
-			//cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
-		}
-
-		//draw the target path
-		for(unsigned int i = 0; i < path.size(); i++)
-		{
-			cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
-		//	cout<<path[i].length<<"  "<<path[i].slope<<endl;
-		}
-		//cout<<endl;
-		////draw the walls
-		for(unsigned int i = 0; i < greenWall.size(); i++)
-		{
-			cvLine(out, greenWall[i].nearEnd, greenWall[i].farEnd, CV_RGB(0, 128, 0), 3);
-		}
-		for(unsigned int i = 0; i < redWall.size(); i++)
-		{
-			cvLine(out, redWall[i].nearEnd, redWall[i].farEnd, CV_RGB(255, 0, 0), 3);
-		}
-		for(unsigned int i = 0; i < blueWall.size(); i++)
-		{
-			cvLine(out, blueWall[i].nearEnd, blueWall[i].farEnd, CV_RGB(0, 0, 255), 3);
-		}
+		drawStuff(out, greenBuoys, redBuoys, yellowBuoys, blueBuoys, gates, path,	greenWall, redWall, blueWall);
 		/****************************************************************************/
-		//********************************************************************
-		//********************************************************************
+
 		
 		char fName[50];
 		char str[10];
@@ -306,6 +222,7 @@ int main()
 		cvShowImage( "out", out );
 #endif
 		cvReleaseImage( &out );//clean up after thyself
+		cvReleaseImage(&img); 
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);
@@ -325,4 +242,110 @@ int main()
 	//cvReleaseCapture(&g_capture2);
 	//Do not release the trackbar before the capture. The code will break. 
 	return 0;
+}
+
+void inputParams(float &closingOnGateDen, float &closingPWM, float &PWMoffset, float &maxThrottle, float &diffCoef, float &leftOff, float &rightOff)
+{
+	cout<<"Closing on Gate Denominator: ";
+	cin>>closingOnGateDen;
+	if(closingOnGateDen <=1 ) closingOnGateDen = 1;
+	else if (closingOnGateDen > 100) closingOnGateDen = 100;
+	else closingOnGateDen = closingOnGateDen;
+
+	cout<<endl<<"Closing PWM: ";
+	cin>>closingPWM;
+	if(closingPWM <=0 ) closingPWM = 10;
+	else if (closingPWM > 100) closingPWM = 100;
+	else closingPWM = closingPWM;
+
+	cout<<endl<<"PWM offset: ";
+	cin>>PWMoffset;
+	if(PWMoffset <=0 ) PWMoffset = 10;
+	else if (PWMoffset > 100) PWMoffset = 100;
+	else PWMoffset = PWMoffset;
+
+	cout<<endl<<"Max Throttle PWM: ";
+	cin>>maxThrottle;
+	if(maxThrottle <=0 ) maxThrottle = 10;
+	else if (maxThrottle > 100) maxThrottle = 100;
+	else maxThrottle = maxThrottle;
+
+	cout<<endl<<"Differential Coefficient: ";
+	cin>>diffCoef;
+	if(diffCoef <=0 ) diffCoef = 0;
+	else if (diffCoef > 100) diffCoef = 100;
+	else diffCoef = diffCoef;
+
+	cout<<endl<<"Left Drive Motor Offset: ";
+	cin>>leftOff;
+	if(leftOff <=0 ) leftOff = 0;
+	else if (leftOff > 100) leftOff = 100;
+	else leftOff = leftOff;
+
+	cout<<endl<<"Right Drive Motor Offset: ";
+	cin>>rightOff;
+	if(leftOff <=0 ) rightOff = 0;
+	else if (leftOff > 100) rightOff = 100;
+	else rightOff = rightOff;
+}
+
+void drawStuff(IplImage* out, vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<buoy> &blueBuoys, vector<gate> &gates, vector<path> &path,	vector<wall> &greenWall, vector<wall> &redWall, vector<wall> &blueWall)
+{
+	//draw the green buoys
+	for(unsigned int i = 0; i < greenBuoys.size(); i++)
+	{
+		CvPoint pt = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+		cvCircle(out, pt, cvRound(greenBuoys[i].radius), CV_RGB(0, 128, 0), 3);
+		//cout<<greenBuoys[i].x<<"     "<<greenBuoys[i].y<<"  "<<i<<endl;
+	}
+
+	//draw the red buoys
+	for(unsigned int i = 0; i < redBuoys.size(); i++)
+	{
+		CvPoint pt = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+		cvCircle(out, pt, cvRound(redBuoys[i].radius), CV_RGB(255, 0, 0), 3);
+		//cout<<redBuoys[i].y<<"  b  "<<i<<endl;
+	}
+
+	//draw the yellow buoys
+	for(unsigned int i = 0; i < yellowBuoys.size(); i++)
+	{
+		CvPoint pt = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
+		cvCircle(out, pt, cvRound(yellowBuoys[i].radius), CV_RGB(255, 255, 0), 3);
+	}
+
+	////draw the blue buoys
+	for(unsigned int i = 0; i < blueBuoys.size(); i++)
+	{
+		CvPoint pt = cvPoint(cvRound(blueBuoys[i].x), cvRound(blueBuoys[i].y));
+		cvCircle(out, pt, cvRound(blueBuoys[i].radius), CV_RGB(0, 0, 255), 3);
+	}
+
+	//draw the gates
+	for(unsigned int i = 0; i < gates.size(); i++)
+	{
+		cvLine(out, gates[i].green, gates[i].red, CV_RGB(255, 255, 255), 3);
+		//cout<<"Yellow buoy"<<gates[i].yellow.x<<endl;
+	}
+
+	//draw the target path
+	for(unsigned int i = 0; i < path.size(); i++)
+	{
+		cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
+	//	cout<<path[i].length<<"  "<<path[i].slope<<endl;
+	}
+	//cout<<endl;
+	////draw the walls
+	for(unsigned int i = 0; i < greenWall.size(); i++)
+	{
+		cvLine(out, greenWall[i].nearEnd, greenWall[i].farEnd, CV_RGB(0, 128, 0), 3);
+	}
+	for(unsigned int i = 0; i < redWall.size(); i++)
+	{
+		cvLine(out, redWall[i].nearEnd, redWall[i].farEnd, CV_RGB(255, 0, 0), 3);
+	}
+	for(unsigned int i = 0; i < blueWall.size(); i++)
+	{
+		cvLine(out, blueWall[i].nearEnd, blueWall[i].farEnd, CV_RGB(0, 0, 255), 3);
+	}
 }

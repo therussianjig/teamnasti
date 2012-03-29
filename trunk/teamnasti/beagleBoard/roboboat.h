@@ -8,3 +8,5 @@
 // overall project once.
 #pragma once
 
+void inputParams(float &closingOnGateDen, float &closingPWM, float &PWMoffset, float &maxThrottle, float &diffCoef, float &leftOff, float &rightOff);
+void drawStuff(IplImage* out, vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<buoy> &blueBuoys, vector<gate> &gates, vector<path> &path,	vector<wall> &greenWall, vector<wall> &redWall, vector<wall> &blueWall);

@@ -13,7 +13,7 @@
 using namespace std;
 using namespace cv;
 
-void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset) 
+void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
 {
 	float closingOnGate = path[0].height/closingOnGateDen;
 	float throttlePWM = 0;
@@ -65,7 +65,9 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 			}
 		}
 		//set throttle value proportional to the length of the path line
-		throttlePWM = (path[0].length / path[0].height)*100 + PWMoffset;
+		throttlePWM = (path[0].length / path[0].height)*(float)100.0 + PWMoffset;
+		if(throttlePWM > maxThrottle) throttlePWM = maxThrottle;
+		else throttlePWM = throttlePWM;
 	}
 	if(direction == 'L')
 	{
@@ -75,7 +77,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 		}
 		else 
 		{
-			LturnOffset = PWMoffset/2;
+			LturnOffset = diffCoef*(PWMoffset/(float)2.0);
 		}
 	}
 	else if(direction == 'R')
@@ -86,7 +88,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 		}
 		else 
 		{
-			RturnOffset = PWMoffset/2;
+			RturnOffset = diffCoef*(PWMoffset/(float)2.0);
 		}
 	}
 	else 
@@ -96,7 +98,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 	}
 	turn(severity, direction, motors);
 	//throttle(throttlePWM, motors);
-	mainThrust(throttlePWM - LturnOffset, throttlePWM - RturnOffset, motors);
+	mainThrust(leftOff*(throttlePWM - LturnOffset), rightOff*(throttlePWM - RturnOffset), motors);
 }
 
 void throttle(float PWM, vector<float> &motors)

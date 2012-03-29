@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
+void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting)
 {	
 	vector<buoy> buoysSorted;
 	//run processing on the stuff in the water only *************************************
@@ -57,10 +57,14 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys)
 	}
 	else if (color == 'r')
 	{
-		hsv_min  = cvScalar( 0, 150, 100, 0);
+		hsv_min  = cvScalar( 0, 120, 100, 0);
 		hsv_max  = cvScalar(30, 255, 255, 0);
-		hsv_min2 = cvScalar(100,  150, 100, 0);
+		hsv_min2 = cvScalar(100, 120, 100, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
+		//hsv_min  = cvScalar( 0, 150, 100, 0);
+		//hsv_max  = cvScalar(30, 255, 255, 0);
+		//hsv_min2 = cvScalar(100,  150, 100, 0);
+		//hsv_max2 = cvScalar(180, 255, 255, 0);
 	}
 	else if (color == 'y')
 	{

@@ -72,14 +72,16 @@ int main()
 	else if (PWMoffset > 100) PWMoffset = 100;
 	else PWMoffset = PWMoffset;
 
-	cout<<endl<<"One Camera? ";
-	cin>>key2;
-	if(key2 == 'y') oneCAM = TRUE;
-	else oneCAM = FALSE;
+	//cout<<endl<<"One Camera? ";
+	//cin>>key2;
+	//if(key2 == 'y') oneCAM = TRUE;
+	//else oneCAM = FALSE;
+	oneCAM = TRUE;
 
 	g_capture  = cvCaptureFromCAM(-1);
-	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
-	else g_capture2 = 0x0;
+	//if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
+	//else g_capture2 = 0x0;
+	 
 	//CvCapture* g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
@@ -116,35 +118,35 @@ int main()
 		
 		img_full = cvRetrieveFrame(g_capture);       //from video/camera
 		if( !img_full ) break; 
-		img1 =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
-		cvResize(img_full,img1);
+		img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+		cvResize(img_full,img);
 #ifdef debug
 		cvNamedWindow( "show",CV_WINDOW_AUTOSIZE);
 		cvShowImage( "show", img1 );
 #endif
-		if(oneCAM == FALSE)
-		{
-			img_full2 = cvQueryFrame(g_capture2);       //from video/camera2 
-			if( !img_full2 ) break; 
-			img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
-			cvResize(img_full2,img2);
+		//if(oneCAM == FALSE)
+		//{
+		//	img_full2 = cvQueryFrame(g_capture2);       //from video/camera2 
+		//	if( !img_full2 ) break; 
+		//	img2 =  cvCreateImage(cvSize(320,240), img_full2->depth, img_full2->nChannels);
+		//	cvResize(img_full2,img2);
 
-			if( !img1 || !img2 ) break; 
-		 
-			CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
-			img =  cvCreateImage(size, img1->depth, img1->nChannels);
-			cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
-			cvCopy(img1, img, NULL);
-			cvResetImageROI(img);
-			cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
-			cvCopy(img2, img, NULL);
-			cvResetImageROI(img);
-		}
-		else
-		{
-			img =  cvCreateImage(cvGetSize(img1), img1->depth, img1->nChannels);
-			cvCopy(img1, img, NULL);
-		}
+		//	if( !img1 || !img2 ) break; 
+		// 
+		//	CvSize size = cvSize(2*cvGetSize(img1).width, cvGetSize(img1).height);
+		//	img =  cvCreateImage(size, img1->depth, img1->nChannels);
+		//	cvSetImageROI(img, cvRect(0,0, cvGetSize(img1).width, cvGetSize(img1).height));
+		//	cvCopy(img1, img, NULL);
+		//	cvResetImageROI(img);
+		//	cvSetImageROI(img, cvRect(cvGetSize(img1).width,0, cvGetSize(img2).width, cvGetSize(img2).height));
+		//	cvCopy(img2, img, NULL);
+		//	cvResetImageROI(img);
+		//}
+		//else
+		//{
+		//	img =  cvCreateImage(cvGetSize(img1), img1->depth, img1->nChannels);
+		//	cvCopy(img1, img, NULL);
+		//}
 #ifdef debug
 		cvShowImage( "in", img ); 
 #endif

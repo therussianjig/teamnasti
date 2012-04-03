@@ -49,18 +49,20 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	CvScalar hsv_min2;
 	CvScalar hsv_max2;
 
+	//for low light, decrease minimum value  (3rd input)
+	//for high light, decrease minimum saturation (2nd input)
 	if(color == 'g')
 	{
 		hsv_min  = cvScalar( 50, 255, 255, 0);
 		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(50, 200, 50, 0);
-		hsv_max2 = cvScalar(70, 255, 255, 0);
+		hsv_min2 = cvScalar(35, 50, 50, 0);
+		hsv_max2 = cvScalar(60, 255, 255, 0);
 	}
 	else if (color == 'r')
 	{
-		hsv_min  = cvScalar( 0, 120, 80, 0);
+		hsv_min  = cvScalar( 0, 200, 200, 0);
 		hsv_max  = cvScalar(30, 255, 255, 0);
-		hsv_min2 = cvScalar(100, 120, 80, 0);
+		hsv_min2 = cvScalar(110, 200, 110, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
 		//hsv_min  = cvScalar( 0, 150, 100, 0);
 		//hsv_max  = cvScalar(30, 255, 255, 0);
@@ -69,10 +71,10 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	}
 	else if (color == 'y')
 	{
-		hsv_min  = cvScalar( 0, 0, 250, 0);
+		hsv_min  = cvScalar( 0, 5, 250, 0);
 		hsv_max  = cvScalar(60, 10, 255, 0);
-		hsv_min2 = cvScalar(80,  0, 250, 0);
-		hsv_max2 = cvScalar(180, 10, 255, 0);
+		hsv_min2 = cvScalar(60,  100, 200, 0);
+		hsv_max2 = cvScalar(100, 255, 255, 0);
 	}
 	else if (color == 'b')
 	{
@@ -96,14 +98,13 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	cvOr(thresholded, thresholded2, thresholded3);
 
 	//Atempt to doctor the image so that the circles are found easier
+#ifdef unix
+	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
+#endif
 	cvErode(thresholded3, thresholded3, NULL, 1);
-	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9);
-	//cvDilate(hsvImg, hsvImg, NULL, 5);
-	//cvDilate(thresholded, thresholded, NULL, 3);
-	//cvDilate(thresholded, thresholded, NULL, 3);
+	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9); //heavy blur
+	cvDilate(thresholded3, thresholded3, NULL, 3);
 	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
-	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
-	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 9, 9);
 
 #ifdef debug
 	//make an image so I can see what is happening durring the edge detection
@@ -208,7 +209,7 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 
 #ifdef debug
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "HSV", hsvImg );
+	cvShowImage( "HSV", thresholded );
 	cvNamedWindow( "thresholded",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "thresholded", thresholded3 );
 	cvNamedWindow( "thresholded2",CV_WINDOW_AUTOSIZE);

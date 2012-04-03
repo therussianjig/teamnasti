@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting)
+IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting)
 {	
 	vector<buoy> buoysSorted;
 	//run processing on the stuff in the water only *************************************
@@ -42,6 +42,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char l
 	IplImage* hsvImg       = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 3);
 	IplImage* thresholded  = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
 	IplImage* thresholded2 = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
+	IplImage* thresholded3  = cvCreateImage(cvGetSize(in), IPL_DEPTH_8U, 1);
 
 	CvScalar hsv_min;
 	CvScalar hsv_max;
@@ -57,9 +58,9 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char l
 	}
 	else if (color == 'r')
 	{
-		hsv_min  = cvScalar( 0, 120, 100, 0);
+		hsv_min  = cvScalar( 0, 120, 80, 0);
 		hsv_max  = cvScalar(30, 255, 255, 0);
-		hsv_min2 = cvScalar(100, 120, 100, 0);
+		hsv_min2 = cvScalar(100, 120, 80, 0);
 		hsv_max2 = cvScalar(180, 255, 255, 0);
 		//hsv_min  = cvScalar( 0, 150, 100, 0);
 		//hsv_max  = cvScalar(30, 255, 255, 0);
@@ -92,17 +93,17 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char l
 
 	cvInRangeS(hsvImg,  hsv_min,  hsv_max,  thresholded);
 	cvInRangeS(hsvImg, hsv_min2, hsv_max2, thresholded2);
-	cvOr(thresholded, thresholded2, thresholded);
+	cvOr(thresholded, thresholded2, thresholded3);
 
 	//Atempt to doctor the image so that the circles are found easier
-	cvErode(thresholded, thresholded, NULL, 1);
+	cvErode(thresholded3, thresholded3, NULL, 1);
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9);
 	//cvDilate(hsvImg, hsvImg, NULL, 5);
 	//cvDilate(thresholded, thresholded, NULL, 3);
 	//cvDilate(thresholded, thresholded, NULL, 3);
-	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
-	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 3, 3);
-	cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
+	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
+	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
+	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 9, 9);
 
 #ifdef debug
 	//make an image so I can see what is happening durring the edge detection
@@ -118,7 +119,7 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char l
 	//CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT,  2, 50, 200, 10, 1, 50);
 	/*CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT, 4, 10, 200, 3, 1, 50);*/
 	CBlobResult blobs;
-	blobs = CBlobResult( thresholded, NULL, 0);
+	blobs = CBlobResult( thresholded3, NULL, 0);
 	
 	buoys.resize(blobs.GetNumBlobs());
 	int k = 0;
@@ -209,16 +210,19 @@ void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char l
 	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "HSV", hsvImg );
 	cvNamedWindow( "thresholded",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "thresholded", thresholded );
+	cvShowImage( "thresholded", thresholded3 );
 	cvNamedWindow( "thresholded2",CV_WINDOW_AUTOSIZE);
 	cvShowImage( "thresholded2", thresholded2 );
 #endif
 	//Used with the Hough Circle Transform
 	//cvReleaseMemStorage(&storage);
-	cvReleaseImage(&thresholded);
+	//cvReleaseImage(&thresholded);
+	
 	cvReleaseImage(&hsvImg);
 	cvReleaseImage(&thresholded2);
+	cvReleaseImage(&thresholded3);
 	cvReleaseImage(&out);
+	return(thresholded);
 }
 
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)

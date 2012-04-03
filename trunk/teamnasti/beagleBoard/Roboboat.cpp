@@ -102,7 +102,7 @@ int main()
 	{   
 	//SendByte(cport_nr, 'J');
 		// retrieve the captured frame and display it in a window
-		//img = cvLoadImage("high.jpeg"); //from image
+		//img = cvLoadImage("balls.jpeg"); //from image
 		//IplImage* img1 =cvRetrieveFrame(g_capture);   //from camera
 		//if( !img1 ) break;
 		
@@ -122,7 +122,7 @@ int main()
 #endif
 		//do stuff in here****************************************************
 		//********************************************************************
-		int horizon = img->height/2;
+		int horizon = img->height/3;
 
 		out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 
@@ -134,7 +134,7 @@ int main()
 		findBuoy(img, horizon, 'g', greenBuoys, lighting);
 
 		//find the red buoys
-		findBuoy(img, horizon, 'r', redBuoys, lighting);
+		img2 = findBuoy(img, horizon, 'r', redBuoys, lighting);
 
 		//find the yellow buoys
 		//findBuoy(img, horizon, 'y', yellowBuoys, lighting);
@@ -215,14 +215,17 @@ int main()
 		imgCount++;
 
 #ifdef unix
-		cvSaveImage(fName, out);
+		cvSaveImage(fName, img2);
 #endif
 		//Show altered image in another window
 #ifdef debug
 		cvShowImage( "out", out );
 #endif
 		cvReleaseImage( &out );//clean up after thyself
-		cvReleaseImage(&img); 
+		cvReleaseImage(&img);
+		cvReleaseImage(&img1);
+		cvReleaseImage(&img2);
+		cvReleaseImage(&img_full);
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);

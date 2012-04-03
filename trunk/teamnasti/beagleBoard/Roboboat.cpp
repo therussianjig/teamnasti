@@ -216,6 +216,7 @@ int main()
 
 #ifdef unix
 		cvSaveImage(fName, img2);
+		cvSaveImage(strcat(strcat("in",fName), ".jpeg"), img);
 #endif
 		//Show altered image in another window
 #ifdef debug

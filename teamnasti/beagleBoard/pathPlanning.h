@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv; 
 
-void findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting);
+IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting);
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates);
 bool redRightReturn(vector<gate> &gates);
 int findPath(IplImage* in, vector<gate> &gates, vector<path> &path);

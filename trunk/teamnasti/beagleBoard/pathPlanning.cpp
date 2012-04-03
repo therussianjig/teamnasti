@@ -55,8 +55,8 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	{
 		hsv_min  = cvScalar( 50, 255, 255, 0);
 		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(35, 50, 50, 0);
-		hsv_max2 = cvScalar(60, 255, 255, 0);
+		hsv_min2 = cvScalar(50, 200, 50, 0);
+		hsv_max2 = cvScalar(70, 255, 255, 0);
 	}
 	else if (color == 'r')
 	{
@@ -98,8 +98,7 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	cvOr(thresholded, thresholded2, thresholded3);
 
 	//Atempt to doctor the image so that the circles are found easier
-#ifdef unix
-	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
+	if(color != 'y') { cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3); }
 #endif
 	cvErode(thresholded3, thresholded3, NULL, 1);
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9); //heavy blur
@@ -271,7 +270,7 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				{
 					for(unsigned int k = 0; k < yellowBuoys.size(); k++)
 					{
-						if((yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
+						if((yellowBuoys[k].y < ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
 						{
 							gates[i].yellow = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
 						}

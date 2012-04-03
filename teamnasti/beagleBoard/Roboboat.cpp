@@ -60,7 +60,7 @@ int main()
 	float leftOff = 1.0;
 	float rightOff = 1.0;
 
-	inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+	//inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 
 	//cout<<endl<<"One Camera? ";
 	//cin>>key2;
@@ -69,8 +69,8 @@ int main()
 	oneCAM = TRUE;
 
 	g_capture  = cvCaptureFromCAM(-1);
-	//if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
-	//else g_capture2 = 0x0;
+	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
+	else g_capture2 = 0x0;
 	 
 	//g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
@@ -131,13 +131,13 @@ int main()
 		
 		
 		//find the green buoys
-		findBuoy(img, horizon, 'g', greenBuoys, lighting);
-
+		img1 = findBuoy(img, horizon, 'g', greenBuoys, lighting);
+		
 		//find the red buoys
 		img2 = findBuoy(img, horizon, 'r', redBuoys, lighting);
 
 		//find the yellow buoys
-		//findBuoy(img, horizon, 'y', yellowBuoys, lighting);
+		img2 = findBuoy(img, horizon, 'y', yellowBuoys, lighting);
 
 		//find the blue buoys
 		//findBuoy(img, horizon, 'b', blueBuoys, lighting);
@@ -216,7 +216,7 @@ int main()
 
 #ifdef unix
 		cvSaveImage(fName, img2);
-		cvSaveImage(strcat(strcat("in",fName), ".jpeg"), img);
+		//cvSaveImage(strcat(strcat("in",fName), ".jpeg"), img);
 #endif
 		//Show altered image in another window
 #ifdef debug
@@ -226,7 +226,7 @@ int main()
 		cvReleaseImage(&img);
 		cvReleaseImage(&img1);
 		cvReleaseImage(&img2);
-		cvReleaseImage(&img_full);
+		//cvReleaseImage(&img_full);
 //#endif
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);
@@ -243,7 +243,7 @@ int main()
 	//cvReleaseImage(&img); //I guess I don't need to do this 
 #endif
 	cvReleaseCapture(&g_capture); //Must release capture device or mem leak
-	//cvReleaseCapture(&g_capture2);
+	cvReleaseCapture(&g_capture2);
 	//Do not release the trackbar before the capture. The code will break. 
 	return 0;
 }

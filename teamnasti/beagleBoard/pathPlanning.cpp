@@ -218,11 +218,11 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	//cvReleaseMemStorage(&storage);
 	//cvReleaseImage(&thresholded);
 	
-	cvReleaseImage(&hsvImg);
+	cvReleaseImage(&thresholded);
 	cvReleaseImage(&thresholded2);
 	cvReleaseImage(&thresholded3);
 	cvReleaseImage(&out);
-	return(thresholded);
+	return(hsvImg);
 }
 
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)

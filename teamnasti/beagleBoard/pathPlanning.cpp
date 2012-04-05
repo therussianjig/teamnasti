@@ -98,8 +98,8 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	cvOr(thresholded, thresholded2, thresholded3);
 
 	//Atempt to doctor the image so that the circles are found easier
-	if(color != 'y') { cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3); }
-#endif
+	if(color != 'y'){ cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3); }
+
 	cvErode(thresholded3, thresholded3, NULL, 1);
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9); //heavy blur
 	cvDilate(thresholded3, thresholded3, NULL, 3);
@@ -151,38 +151,6 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 		}
 	}
 
-	//Atempt to narrow the found buoys down to actual buoys by checking for the existance of a bouy 
-	//within the circle
-	/*buoys.resize(circles->total);
-	int k = 0;
-	for(int i = (circles->total); i > 0; i--)
-	{
-		float* p = (float*) cvGetSeqElem(circles, i);
-		float x = p[0];
-		float y = p[1];
-		float radius = p[2];
-		float diameter = 2*radius;
-		float n =0;
-		float total = diameter*diameter;
-
-//		for( int k = 0; k < 2*p[2]; k++)
-//		{
-			uchar* ptr = (uchar*)(thresholded->imageData  + (int)(y) * thresholded->widthStep);
-		//	for(int f = 0; f < 2*p[2]; f++)
-		//	{
-		//		if(ptr[(int)(p[0]-p[2]+f)]) n++;
-		//		else n = n;
-		//	}
-		//}
-		if(ptr[(int)(x)])
-		{
-			buoys[k].x= p[0];
-			buoys[k].y = p[1];
-			buoys[k].radius = p[2];
-			k++;
-		}
-	}
-	*/
 	//sort the vector of buoys so that the first listed buoys are the 'closest' buoys
 	buoys.resize(k);
 	buoysSorted.resize(k);
@@ -227,9 +195,8 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)
 {
-	unsigned int yellowBand = 100;
 	//make sure there is a pair of red/green buoys
-	if (greenBuoys.size() > 0 && redBuoys.size() > 0)
+	if ((greenBuoys.size() > 0) && (redBuoys.size() > 0))
 	{
 		//determine which color buoys there are more of
 		if (greenBuoys.size() > redBuoys.size())
@@ -241,19 +208,6 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
 				gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
 					cvRound((gates[i].green.y + gates[i].red.y)/2.0));
-				if(yellowBuoys.size() > 0)
-				{
-					for(unsigned int k = 0; k < yellowBuoys.size(); k++)
-					{
-						if((yellowBuoys[k].y < ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
-						{
-							gates[i].yellow = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
-						}
-						else 
-						{gates[i].yellow = cvPoint(0, 0);}
-					}
-				}
-				else {gates[i].yellow = cvPoint(0, 0);}
 			}
 		}
 		else
@@ -265,20 +219,6 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
 				gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
 					cvRound((gates[i].green.y + gates[i].red.y)/2.0));
-				//cout<<redBuoys[i].y<<" g "<<i<<endl;
-				if(yellowBuoys.size() > 0)
-				{
-					for(unsigned int k = 0; k < yellowBuoys.size(); k++)
-					{
-						if((yellowBuoys[k].y < ((greenBuoys[i].y + redBuoys[i].y)/2) + yellowBand) && (yellowBuoys[k].y > ((greenBuoys[i].y + redBuoys[i].y)/2) - yellowBand))
-						{
-							gates[i].yellow = cvPoint(cvRound(yellowBuoys[i].x), cvRound(yellowBuoys[i].y));
-						}
-						else
-						{gates[i].yellow = cvPoint(0, 0);}
-					}
-				}
-				else {gates[i].yellow = cvPoint(0, 0);}
 			}
 		}
 	}
@@ -357,4 +297,33 @@ int constructWall(vector<buoy> &buoys, vector<wall> &walls)
 		return(1);
 	}
 	else return(0);
+}
+
+bool checkForObsticle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys)
+{
+	bool obsticle = false;
+	//check if a yellow buoy has been detected
+	if( (yellowBuoys.size() == 0))
+	{
+		obsticle = false;
+	}
+	//determine if the yellow buoy needs to be avoided
+	else if(greenBuoys.size() == 0 && redBuoys.size() == 0)
+	{
+		obsticle = true;
+	}
+	else
+	{
+		if(greenBuoys.size() > 0)
+		{
+			if(yellowBuoys[0].y > greenBuoys[0].y){obsticle = true;}
+			else {obsticle = false;}
+		}
+		else
+		{
+			if(yellowBuoys[0].y > redBuoys[0].y){obsticle = true;}
+			else {obsticle = false;}
+		}
+	}
+	return(obsticle);
 }

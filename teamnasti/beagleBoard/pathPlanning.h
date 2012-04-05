@@ -13,3 +13,4 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 bool redRightReturn(vector<gate> &gates);
 int findPath(IplImage* in, vector<gate> &gates, vector<path> &path);
 int constructWall(vector<buoy> &Buoys, vector<wall> &walls);
+bool checkForObsticle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys);

@@ -404,3 +404,36 @@ IplImage* addROI(IplImage* in, int horizon)
 		//	cvCopy(img1, img, NULL);
 		//}
 //*******************************************************************************************************************************************
+
+	//Atempt to narrow the found buoys down to actual buoys by checking for the existance of a bouy 
+	//within the circle
+	/*buoys.resize(circles->total);
+	int k = 0;
+	for(int i = (circles->total); i > 0; i--)
+	{
+		float* p = (float*) cvGetSeqElem(circles, i);
+		float x = p[0];
+		float y = p[1];
+		float radius = p[2];
+		float diameter = 2*radius;
+		float n =0;
+		float total = diameter*diameter;
+
+//		for( int k = 0; k < 2*p[2]; k++)
+//		{
+			uchar* ptr = (uchar*)(thresholded->imageData  + (int)(y) * thresholded->widthStep);
+		//	for(int f = 0; f < 2*p[2]; f++)
+		//	{
+		//		if(ptr[(int)(p[0]-p[2]+f)]) n++;
+		//		else n = n;
+		//	}
+		//}
+		if(ptr[(int)(x)])
+		{
+			buoys[k].x= p[0];
+			buoys[k].y = p[1];
+			buoys[k].radius = p[2];
+			k++;
+		}
+	}
+	*/

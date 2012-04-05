@@ -49,6 +49,7 @@ int main()
 	vector<wall> blueWall;
 	bool RedRightReturn = FALSE;
 	bool oneCAM = FALSE;
+	bool avoidYellow = false;
 
 	char lighting = 0;
 
@@ -127,8 +128,6 @@ int main()
 		out =  cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 
 		cvCopy(img, out, NULL);
-
-		
 		
 		//find the green buoys
 		img1 = findBuoy(img, horizon, 'g', greenBuoys, lighting);
@@ -155,9 +154,10 @@ int main()
 		 
 		//find the path
 		findPath(img, gates, path);
-
+		avoidYellow = checkForObsticle(greenBuoys, redBuoys, yellowBuoys);
+		cout<<avoidYellow<<endl;
 		//Determine motor signals
-		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		navigateChannel(path, motors, avoidYellow,closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{

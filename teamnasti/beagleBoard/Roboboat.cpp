@@ -61,6 +61,7 @@ int main()
 	float diffCoef = 1.0;
 	float leftOff = 1.0;
 	float rightOff = 1.0;
+	float nSlope = 1.0;
 
 	//inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 	
@@ -169,7 +170,9 @@ int main()
 		//findBuoy(img, horizon, 'b', blueBuoys, lighting);
 
 		//construct the gates
-		constructGates(greenBuoys, redBuoys, yellowBuoys, gates);
+		avoidYellow = checkForObsticle(greenBuoys, redBuoys, yellowBuoys);
+		constructGates(greenBuoys, redBuoys, yellowBuoys, gates, avoidYellow);
+		//cout<<avoidYellow<<endl;
 		
 		//determine leaving port/return to port
 		RedRightReturn = redRightReturn(gates);
@@ -180,13 +183,14 @@ int main()
 		constructWall(blueBuoys, blueWall);
 		 
 		//find the path
-		avoidYellow = checkForObsticle(greenBuoys, redBuoys, yellowBuoys);
 		findPath(img, gates, path);
-		//cout<<avoidYellow<<endl;
+
 		
 		//Determine motor signals
-		navigateChannel(path, motors, avoidYellow,closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
-		
+		//if(avoidYellow == true){
+		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);}
+		//else{avoidObsticle(path, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
+				
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
 			//motors[i] = 5;

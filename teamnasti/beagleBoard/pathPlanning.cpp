@@ -203,7 +203,7 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 		gates[0].green = cvPoint(cvRound(yellowBuoys[0].x), cvRound(yellowBuoys[0].y));
 		gates[0].red = cvPoint(cvRound(yellowBuoys[0].x), cvRound(yellowBuoys[0].y));
 		gates[0].goal = cvPoint(cvRound((gates[0].green.x + gates[0].red.x)/2.0), 
-			cvRound((gates[i].green.y + gates[0].red.y)/2.0));
+			cvRound((gates[0].green.y + gates[0].red.y)/2.0));
 	}
 	else 
 	{

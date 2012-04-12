@@ -11,10 +11,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fstream>
+//#include <fstream>
 #endif
 
 #include "stdafx.h"
+#include <fstream>
 using namespace std;
 using namespace cv;
 
@@ -67,23 +68,23 @@ int main()
 	
 	
 	/*********get Params*********/
-	ifstream fName("params.txt");
+	ifstream pName("params.txt");
 	float vals[7];
 	float temp;
 	int iLoop = 0;
-	if(!fName) {
+	if(!pName) {
 		cout << "You are missing your input File" << endl;
 	}
 	
 	else {
-		while(fName >> temp) {
+		while(pName >> temp) {
 		vals[iLoop] = temp;
 		iLoop++;
 		cout << temp << endl;
 		}
 	}
 	
-	closingOngateDen = vals[0];
+	closingOnGateDen = vals[0];
 	closingPWM = vals[1];
 	PWMoffset = vals[2];
 	maxThrottle = vals[3];
@@ -188,7 +189,8 @@ int main()
 		
 		//Determine motor signals
 		//if(avoidYellow == true){
-		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);}
+		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		//}
 		//else{avoidObsticle(path, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
 				
 		for(unsigned int i = 0; i < motors.size(); i++)

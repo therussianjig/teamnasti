@@ -13,12 +13,13 @@
 using namespace std;
 using namespace cv;
 
-void navigateChannel(vector<path> &path, vector<float> &motors,bool avoidYellow, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
+void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
 {
 	float closingOnGate = path[0].height/closingOnGateDen;
 	float throttlePWM = 0;
 	float LturnOffset = 0;
 	float RturnOffset = 0;
+	float aheadSlope = 5.0;
 	char direction = 'N';
 	char severity = 'N';
 
@@ -32,13 +33,13 @@ void navigateChannel(vector<path> &path, vector<float> &motors,bool avoidYellow,
 	else
 	{
 		//don't need to turn
-		if(abs(path[0].slope) > 5)
+		if(abs(path[0].slope) > aheadSlope)
 		{
 			cout<<"Dead ahead Cap'n"<<endl;
 			severity = 'N';
 			direction = 'F';
 		}
-		//need to turn
+		//need to turn **REMOVING THE SEVERITY, SIDE THRUST DOESNT MAKE ENOUGH DIFERENCE**
 		else
 		{
 			//need to turn left
@@ -61,7 +62,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors,bool avoidYellow,
 			else
 			{
 				cout<<"Turning Slightly:  "<<direction<<endl;
-				severity = 'S';
+				severity = 'H';
 			}
 		}
 		//set throttle value proportional to the length of the path line
@@ -71,25 +72,17 @@ void navigateChannel(vector<path> &path, vector<float> &motors,bool avoidYellow,
 	}
 	if(direction == 'L')
 	{
-		if(severity == 'H')
-		{
-			LturnOffset = PWMoffset;
-		}
-		else 
-		{
-			LturnOffset = diffCoef*(PWMoffset/(float)2.0);
-		}
+		LturnOffset = diffCoef*(aheadSlope - path[0].slope);
+		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
+		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
+		RturnOffset = 0.0;
 	}
 	else if(direction == 'R')
 	{
-		if(severity == 'H')
-		{
-			RturnOffset = PWMoffset;
-		}
-		else 
-		{
-			RturnOffset = diffCoef*(PWMoffset/(float)2.0);
-		}
+		RturnOffset = diffCoef*(PWMoffset/(float)2.0);
+		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
+		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
+		RturnOffset = 0.0;
 	}
 	else 
 	{
@@ -100,7 +93,79 @@ void navigateChannel(vector<path> &path, vector<float> &motors,bool avoidYellow,
 	//throttle(throttlePWM, motors);
 	mainThrust(leftOff*(throttlePWM - LturnOffset), rightOff*(throttlePWM - RturnOffset), motors);
 }
+void avoidObsticle(vector<path> &path, vector<float> &motors, float PWMoffset, float maxThrottle, float yellowCoef, float leftOff, float rightOff, float nSlope)
+{
+	float throttlePWM = 0;
+	float LturnOffset = 0;
+	float RturnOffset = 0;
+	// 'T' = move toward yellow
+	// 'A' = move away from yellow
+	char direction = 'N';
+	char severity = 'H';
 
+	{
+		if(abs(path[0].slope > 100)){;}
+		//need to move away
+		if(abs(path[0].slope) > nSlope)
+		{
+			cout<<"Dead ahead Cap'n"<<endl;
+			severity = 'N';
+			direction = 'F';
+		}
+		//need to turn **REMOVING THE SEVERITY, SIDE THRUST DOESNT MAKE ENOUGH DIFERENCE**
+		else
+		{
+			//need to turn left
+			if(path[0].slope > 0)
+			{
+				direction = 'L';
+			}
+			//need to turn right
+			else
+			{
+				direction = 'R';
+			}
+			//need a hard turn
+			if(abs(path[0].slope) < 1.0)
+			{
+				cout<<"Turning Hard:  "<<direction<<endl;
+				severity = 'H';
+			}
+			//need a slight turn
+			else
+			{
+				cout<<"Turning Slightly:  "<<direction<<endl;
+				severity = 'H';
+			}
+		}
+		//set throttle value proportional to the length of the path line
+		throttlePWM = (path[0].length / path[0].height)*(float)100.0 + PWMoffset;
+		if(throttlePWM > maxThrottle) throttlePWM = maxThrottle;
+		else throttlePWM = throttlePWM;
+	}
+	if(direction == 'L')
+	{
+		LturnOffset = diffCoef*(aheadSlope - path[0].slope);
+		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
+		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
+		RturnOffset = 0.0;
+	}
+	else if(direction == 'R')
+	{
+		RturnOffset = diffCoef*(PWMoffset/(float)2.0);
+		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
+		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
+		RturnOffset = 0.0;
+	}
+	else 
+	{
+		LturnOffset = 0;
+		RturnOffset = 0;
+	}	
+	
+	turn(severity, direction, motors);
+	mainThrust(leftOff*(throttlePWM - LturnOffset), rightOff*(throttlePWM - RturnOffset), motors);
+}
 void throttle(float PWM, vector<float> &motors)
 {
 	mainThrust(PWM, PWM, motors);

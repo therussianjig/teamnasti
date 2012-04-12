@@ -193,41 +193,54 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	return(thresholded3);
 }
 
-int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates)
+int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow)
 {
-	//make sure there is a pair of red/green buoys
-	if ((greenBuoys.size() > 0) && (redBuoys.size() > 0))
+	//Check if the boat needs to avoid a yellow buoy, if so set the first target to the yellow buoy
+	if(avoidYellow == true)
 	{
-		//determine which color buoys there are more of
-		if (greenBuoys.size() > redBuoys.size())
+		//If i wanted to avoid some computation, i could just set the goal to the location
+		//of the yellow buoy, however this is currently untested
+		gates[0].green = cvPoint(cvRound(yellowBuoys[0].x), cvRound(yellowBuoys[0].y));
+		gates[0].red = cvPoint(cvRound(yellowBuoys[0].x), cvRound(yellowBuoys[0].y));
+		gates[0].goal = cvPoint(cvRound((gates[0].green.x + gates[0].red.x)/2.0), 
+			cvRound((gates[i].green.y + gates[0].red.y)/2.0));
+	}
+	else 
+	{
+		//make sure there is a pair of red/green buoys
+		if ((greenBuoys.size() > 0) && (redBuoys.size() > 0))
 		{
-			gates.resize(redBuoys.size());
-			for(unsigned int i = 0; i < redBuoys.size(); i++)
+			//determine which color buoys there are more of
+			if (greenBuoys.size() > redBuoys.size())
 			{
-				gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-				gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-				gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
-					cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+				gates.resize(redBuoys.size());
+				for(unsigned int i = 0; i < redBuoys.size(); i++)
+				{
+					gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+					gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+					gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
+						cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+				}
+			}
+			else
+			{
+				gates.resize(greenBuoys.size());
+				for(unsigned int i = 0; i < greenBuoys.size(); i++)
+				{
+					gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+					gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+					gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
+						cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+				}
 			}
 		}
 		else
 		{
-			gates.resize(greenBuoys.size());
-			for(unsigned int i = 0; i < greenBuoys.size(); i++)
-			{
-				gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-				gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-				gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
-					cvRound((gates[i].green.y + gates[i].red.y)/2.0));
-			}
+			if(greenBuoys.size() <= 0 && redBuoys.size() <= 0) return(1);
+			else if (greenBuoys.size() <= 0)                   return(2);
+			else if (redBuoys.size() <= 0)                     return(3);
+			else                                               return(4);
 		}
-	}
-	else
-	{
-		if(greenBuoys.size() <= 0 && redBuoys.size() <= 0) return(1);
-		else if (greenBuoys.size() <= 0)                   return(2);
-		else if (redBuoys.size() <= 0)                     return(3);
-		else                                               return(4);
 	}
 	return(0);
 }

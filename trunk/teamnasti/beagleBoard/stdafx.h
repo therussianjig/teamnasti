@@ -23,6 +23,7 @@
 #include <\opencv\include\opencv\highgui.h>
 #include <\cvblobslib\BlobResult.h>
 #include <\cvblobslib\blob.h>
+
 #include "rs232WIN.h"
 #define debug
 

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #endif
 
 #include "stdafx.h"
@@ -62,7 +63,26 @@ int main()
 	float rightOff = 1.0;
 
 	//inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
-
+	
+	
+	/*********get Params*********/
+	ifstream fName("params.txt");
+	float vals[7];
+	float temp;
+	int iLoop = 0;
+	if(!fName) {
+		cout << "You are missing your input File" << endl;
+	}
+	
+	else {
+		while(fName >> temp) {
+		vals[iLoop] = temp;
+		iLoop++;
+		cout << temp << endl;
+		}
+	}
+	
+	
 	//cout<<endl<<"One Camera? ";
 	//cin>>key2;
 	//if(key2 == 'y') oneCAM = TRUE;
@@ -166,19 +186,11 @@ int main()
 			//SendByte(cport_nr,char(motors[i]));
 		}
 		cout<<endl;
-
-//#ifdef debug
 		
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		SendByte(cport_nr,'*');
 		pwm2uchar(motors, motorschar);
-		//SendByte(cport_nr,255);
-		//SendByte(cport_nr,255);
-		//SendByte(cport_nr,0);
-		//SendByte(cport_nr,0);
-		//SendByte(cport_nr,255);
-		//SendByte(cport_nr,255);
 		SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
@@ -227,7 +239,7 @@ int main()
 		cvReleaseImage(&img1);
 		cvReleaseImage(&img2);
 		//cvReleaseImage(&img_full);
-//#endif
+
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff
 		key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program

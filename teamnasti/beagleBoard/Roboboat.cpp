@@ -82,6 +82,13 @@ int main()
 		}
 	}
 	
+	closingOngateDen = vals[0];
+	closingPWM = vals[1];
+	PWMoffset = vals[2];
+	maxThrottle = vals[3];
+	diffCoef = vals[4];
+	leftOff = vals[5];
+	rightOff = vals[6];
 	
 	//cout<<endl<<"One Camera? ";
 	//cin>>key2;
@@ -173,9 +180,10 @@ int main()
 		constructWall(blueBuoys, blueWall);
 		 
 		//find the path
-		findPath(img, gates, path);
 		avoidYellow = checkForObsticle(greenBuoys, redBuoys, yellowBuoys);
-		cout<<avoidYellow<<endl;
+		findPath(img, gates, path);
+		//cout<<avoidYellow<<endl;
+		
 		//Determine motor signals
 		navigateChannel(path, motors, avoidYellow,closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		

@@ -72,14 +72,14 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 	}
 	if(direction == 'L')
 	{
-		LturnOffset = diffCoef*(aheadSlope - path[0].slope);
+		LturnOffset = diffCoef*(aheadSlope - abs(path[0].slope));
 		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
 		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
 		RturnOffset = 0.0;
 	}
 	else if(direction == 'R')
 	{
-		RturnOffset = diffCoef*(PWMoffset/(float)2.0);
+		RturnOffset = diffCoef*(aheadSlope - abs(path[0].slope));
 		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
 		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
 		RturnOffset = 0.0;

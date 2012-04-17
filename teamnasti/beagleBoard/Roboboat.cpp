@@ -44,8 +44,9 @@ int main()
 	vector<buoy> redBuoys;
 	vector<buoy> yellowBuoys;
 	vector<buoy> blueBuoys;
+	vector<CvPoint> averageBuff;
 	vector<gate> gates;
-	vector<path> path;
+	vector<path> paths;
 	vector<wall> greenWall;
 	vector<wall> redWall;
 	vector<wall> blueWall;
@@ -60,10 +61,14 @@ int main()
 	float PWMoffset = 60.0;
 	float maxThrottle = 100.0;
 	float diffCoef = 1.0;
+	float yellowCoef = 1.0;
 	float leftOff = 1.0;
 	float rightOff = 1.0;
 	float nSlope = 1.0;
 
+	CvPoint target;
+	path control; 
+	averageBuff.resize(4);
 	//inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 	
 	
@@ -102,6 +107,12 @@ int main()
 	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	else g_capture2 = 0x0;
 	 
+	//initialize rolling average values
+	for(unsigned char i = 0; i < averageBuff.size(); i++)
+	{
+		averageBuff[i] = cvPoint(cvRound(cvGrabFrame(g_capture)/2), 0);
+	}
+
 	//g_capture = cvCreateFileCapture("highTight.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
@@ -184,14 +195,17 @@ int main()
 		constructWall(blueBuoys, blueWall);
 		 
 		//find the path
-		findPath(img, gates, path);
+		findPath(img, gates, paths);
 
-		
+		//determine a control signal
+		target = rollAverage(averageBuff, paths);
+		constructControl(&(paths[0].nearEnd), &target, &control);
+
 		//Determine motor signals
-		//if(avoidYellow == true){
-		navigateChannel(path, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
-		//}
-		//else{avoidObsticle(path, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
+		if(avoidYellow == false){
+		navigateChannel(paths, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		}
+		else{avoidObsticle(paths, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
 				
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{
@@ -208,7 +222,7 @@ int main()
 		SendBuf(cport_nr, motorschar, 6);
 
 		/** Drawing Stuff **********************************************************/
-		drawStuff(out, greenBuoys, redBuoys, yellowBuoys, blueBuoys, gates, path,	greenWall, redWall, blueWall);
+		drawStuff(out, greenBuoys, redBuoys, yellowBuoys, blueBuoys, gates, paths,	greenWall, redWall, blueWall, target);
 		/****************************************************************************/
 
 		
@@ -241,7 +255,7 @@ int main()
 		imgCount++;
 
 #ifdef unix
-		cvSaveImage(fName, img2);
+		cvSaveImage(fName, out);
 		//cvSaveImage(strcat(strcat("in",fName), ".jpeg"), img);
 #endif
 		//Show altered image in another window
@@ -319,7 +333,7 @@ void inputParams(float &closingOnGateDen, float &closingPWM, float &PWMoffset, f
 	else rightOff = rightOff;
 }
 
-void drawStuff(IplImage* out, vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<buoy> &blueBuoys, vector<gate> &gates, vector<path> &path,	vector<wall> &greenWall, vector<wall> &redWall, vector<wall> &blueWall)
+void drawStuff(IplImage* out, vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<buoy> &blueBuoys, vector<gate> &gates, vector<path> &paths,	vector<wall> &greenWall, vector<wall> &redWall, vector<wall> &blueWall, CvPoint target)
 {
 	//draw the green buoys
 	for(unsigned int i = 0; i < greenBuoys.size(); i++)
@@ -359,11 +373,14 @@ void drawStuff(IplImage* out, vector<buoy> &greenBuoys, vector<buoy> &redBuoys, 
 	}
 
 	//draw the target path
-	for(unsigned int i = 0; i < path.size(); i++)
+	for(unsigned int i = 0; i < paths.size(); i++)
 	{
-		cvLine(out, path[i].nearEnd, path[i].farEnd, CV_RGB(0, 0, 0), 3);	
-	//	cout<<path[i].length<<"  "<<path[i].slope<<endl;
+		cvLine(out, paths[i].nearEnd, paths[i].farEnd, CV_RGB(0, 0, 0), 3);	
+	//	cout<<paths[i].length<<"  "<<paths[i].slope<<endl;
 	}
+
+	//draw control path 
+	cvLine(out, paths[0].nearEnd, target, CV_RGB(150, 0, 40), 3);
 	//cout<<endl;
 	////draw the walls
 	for(unsigned int i = 0; i < greenWall.size(); i++)

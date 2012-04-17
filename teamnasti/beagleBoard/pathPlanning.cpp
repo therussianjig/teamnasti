@@ -375,3 +375,21 @@ void constructControl(CvPoint *start, CvPoint *end, path *control)
 	y = (control->farEnd.y - control->nearEnd.y);
 	control->length = sqrt((float)((x*x) + (y*y)));
 }
+
+void intigrator(CvPoint *sum, CvPoint *newPoint, float Ki, float width)
+{
+	sum->x = (sum->x - width/2.0) + Ki*(newPoint->x - width/2.0);
+	sum->x = sum->x + width/2.0;
+	sum->y = newPoint->y ;//+ Ki*(newPoint->y);
+}
+
+CvPoint differentiator(CvPoint *old, CvPoint *in, float Kd, float width)
+{
+	CvPoint out;
+
+	out.x = Kd*(in->x - old->x - width);
+	out.x += width/2.0;
+	out.y = in->y;
+	old->x = in->x;
+	return(out);
+}

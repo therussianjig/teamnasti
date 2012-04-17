@@ -16,3 +16,5 @@ void constructControl(CvPoint *start, CvPoint *End, path *control);
 int constructWall(vector<buoy> &Buoys, vector<wall> &walls);
 bool checkForObsticle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys);
 CvPoint rollAverage(vector<CvPoint> &averageBuff, vector<path> &path);
+void intigrator(CvPoint *sum, CvPoint *newPoint, float Ki, float width);
+CvPoint differentiator(CvPoint *old, CvPoint *newPoint, float Kd, float width);

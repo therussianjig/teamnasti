@@ -13,9 +13,9 @@
 using namespace std;
 using namespace cv;
 
-void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
+void navigateChannel(path *control, vector<float> &motors, float height, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
 {
-	float closingOnGate = path[0].height/closingOnGateDen;
+	float closingOnGate = height/closingOnGateDen;
 	float throttlePWM = 0;
 	float LturnOffset = 0;
 	float RturnOffset = 0;
@@ -23,7 +23,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 	char direction = 'N';
 	char severity = 'N';
 
-	if(path[0].length < closingOnGate)
+	if(control->length < closingOnGate)
 	{
 		cout<<"WE'RE GOING IN!!!!!"<<endl;
 
@@ -33,7 +33,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 	else
 	{
 		//don't need to turn
-		if(abs(path[0].slope) > aheadSlope)
+		if(abs(control->slope) > aheadSlope)
 		{
 			cout<<"Dead ahead Cap'n"<<endl;
 			severity = 'N';
@@ -43,7 +43,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 		else
 		{
 			//need to turn left
-			if(path[0].slope > 0)
+			if(control->slope > 0)
 			{
 				direction = 'L';
 			}
@@ -53,7 +53,7 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 				direction = 'R';
 			}
 			//need a hard turn
-			if(abs(path[0].slope) < 1.0)
+			if(abs(control->slope) < 1.0)
 			{
 				cout<<"Turning Hard:  "<<direction<<endl;
 				severity = 'H';
@@ -66,20 +66,20 @@ void navigateChannel(vector<path> &path, vector<float> &motors, float closingOnG
 			}
 		}
 		//set throttle value proportional to the length of the path line
-		throttlePWM = (path[0].length / path[0].height)*(float)100.0 + PWMoffset;
+		throttlePWM = (control->length / height)*(float)100.0 + PWMoffset;
 		if(throttlePWM > maxThrottle) throttlePWM = maxThrottle;
 		else throttlePWM = throttlePWM;
 	}
 	if(direction == 'L')
 	{
-		LturnOffset = diffCoef*(aheadSlope - abs(path[0].slope));
+		LturnOffset = diffCoef*(aheadSlope - abs(control->slope));
 		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
 		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
 		RturnOffset = 0.0;
 	}
 	else if(direction == 'R')
 	{
-		RturnOffset = diffCoef*(aheadSlope - abs(path[0].slope));
+		RturnOffset = diffCoef*(aheadSlope - abs(control->slope));
 		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
 		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
 		RturnOffset = 0.0;

@@ -50,6 +50,7 @@ int main()
 	vector<wall> greenWall;
 	vector<wall> redWall;
 	vector<wall> blueWall;
+	vector<int> buff;
 	bool RedRightReturn = FALSE;
 	bool oneCAM = FALSE;
 	bool avoidYellow = false;
@@ -65,16 +66,20 @@ int main()
 	float leftOff = 1.0;
 	float rightOff = 1.0;
 	float nSlope = 1.0;
-
+	int taps;
+	float Ki = 0.0;
+	float Kd = 0.0;
+	float width = 0.0;
 	CvPoint target;
+	CvPoint oldPoint;
 	path control; 
-	averageBuff.resize(4);
+
 	//inputParams(closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 	
 	
 	/*********get Params*********/
 	ifstream pName("params.txt");
-	float vals[7];
+	float vals[9];
 	float temp;
 	int iLoop = 0;
 	if(!pName) {
@@ -96,27 +101,36 @@ int main()
 	diffCoef = vals[4];
 	leftOff = vals[5];
 	rightOff = vals[6];
-	
+	taps = (int)vals[7];
+	Ki = vals[8];
+	Kd = vals[9];
+
 	//cout<<endl<<"One Camera? ";
 	//cin>>key2;
 	//if(key2 == 'y') oneCAM = TRUE;
 	//else oneCAM = FALSE;
 	oneCAM = TRUE;
 
-	g_capture  = cvCaptureFromCAM(-1);
+	//g_capture  = cvCaptureFromCAM(-1);
 	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	else g_capture2 = 0x0;
 	 
+	g_capture = cvCreateFileCapture("highTight.avi");
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
+	cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
+
 	//initialize rolling average values
+	averageBuff.resize(taps);
+	img_full = cvQueryFrame(g_capture);       //from video/camera
+	if( !img_full ) return(0); 
+	img =  cvCreateImage(cvSize(320,240), img_full->depth, img_full->nChannels);
+	cvResize(img_full,img);
 	for(unsigned char i = 0; i < averageBuff.size(); i++)
 	{
-		averageBuff[i] = cvPoint(cvRound(cvGrabFrame(g_capture)/2), 0);
+		averageBuff[i] = cvPoint(cvRound(img->width/2), 0);
 	}
-
-	//g_capture = cvCreateFileCapture("highTight.avi");
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
-	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
-	
+	target = cvPoint(cvRound(img->width/2), 0);
+	oldPoint = cvPoint(cvRound(img->width/2), 0);
 	#ifndef unix
 	//assert(g_capture); //assert is a windows ONLY macro
 	#endif
@@ -198,12 +212,15 @@ int main()
 		findPath(img, gates, paths);
 
 		//determine a control signal
-		target = rollAverage(averageBuff, paths);
+		//target = rollAverage(averageBuff, paths);
+		width = img->width;
+		//intigrator(&target, &paths[0].farEnd, Ki, width);
+		target = differentiator(&oldPoint, &paths[0].farEnd, Kd, width);
 		constructControl(&(paths[0].nearEnd), &target, &control);
 
 		//Determine motor signals
 		if(avoidYellow == false){
-		navigateChannel(paths, motors, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		navigateChannel(&control, motors, paths[0].height, closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		}
 		else{avoidObsticle(paths, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
 				
@@ -277,7 +294,7 @@ int main()
 		//else if (key2 == 32) {break;}  // Press 'space' to exit program
 	}
 #ifdef debug
-	cvDestroyWindow( "in" ); //good practice to destroy the windows you create
+ 	cvDestroyWindow( "in" ); //good practice to destroy the windows you create
 	cvDestroyWindow("out");
 	cvDestroyWindow( "show" );
 	//cvReleaseImage(&img); //I guess I don't need to do this 
@@ -286,7 +303,7 @@ int main()
 	cvReleaseCapture(&g_capture2);
 	//Do not release the trackbar before the capture. The code will break. 
 	return 0;
-}
+ }
 
 void inputParams(float &closingOnGateDen, float &closingPWM, float &PWMoffset, float &maxThrottle, float &diffCoef, float &leftOff, float &rightOff)
 {

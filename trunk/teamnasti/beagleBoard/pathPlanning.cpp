@@ -198,6 +198,7 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 	//Check if the boat needs to avoid a yellow buoy, if so set the first target to the yellow buoy
 	if(avoidYellow == true)
 	{
+		gates.resize(1);
 		//If i wanted to avoid some computation, i could just set the goal to the location
 		//of the yellow buoy, however this is currently untested
 		gates[0].green = cvPoint(cvRound(yellowBuoys[0].x), cvRound(yellowBuoys[0].y));
@@ -339,4 +340,38 @@ bool checkForObsticle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<b
 		}
 	}
 	return(obsticle);
+}
+
+CvPoint rollAverage(vector<CvPoint> &averageBuff, vector<path> &path)
+{
+	float X = 0.0;
+	float Y = 0.0;
+	//rotate out the old value
+	for(unsigned char i = averageBuff.size()-1; i >0; i--)
+	{
+		averageBuff[i] = averageBuff[i-1];
+
+	}
+	//insert the new value
+	averageBuff[0] = cvPoint(path[0].farEnd.x, path[0].farEnd.y);
+
+	for(unsigned char i = 0; i < averageBuff.size(); i++)
+	{
+		X += averageBuff[i].x;
+		Y += averageBuff[i].y;
+	}
+	X /= averageBuff.size();
+	Y /= averageBuff.size();
+	
+	return(cvPoint((int)X, (int)Y));
+}
+void constructControl(CvPoint *start, CvPoint *end, path *control)
+{
+	int x, y;
+	control->nearEnd = *start;
+	control->farEnd = *end;
+	control->slope = (float)(control->farEnd.y - control->nearEnd.y)/(float)(control->farEnd.x - control->nearEnd.x);
+	x = (control->farEnd.x - control->nearEnd.x);
+	y = (control->farEnd.y - control->nearEnd.y);
+	control->length = sqrt((float)((x*x) + (y*y)));
 }

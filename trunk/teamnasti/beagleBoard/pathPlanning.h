@@ -8,13 +8,12 @@
 using namespace std;
 using namespace cv; 
 
-IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, char lighting);
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow);
 bool redRightReturn(vector<gate> &gates);
 int findPath(IplImage* in, vector<gate> &gates, vector<path> &path);
 void constructControl(CvPoint *start, CvPoint *End, path *control);
 int constructWall(vector<buoy> &Buoys, vector<wall> &walls);
-bool checkForObsticle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys);
+bool checkForObstacle(vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys);
 CvPoint rollAverage(vector<CvPoint> &averageBuff, vector<path> &path);
 void intigrator(CvPoint *sum, CvPoint *newPoint, float Ki, float width);
 CvPoint differentiator(CvPoint *old, CvPoint *newPoint, float Kd, float width);

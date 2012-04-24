@@ -376,6 +376,39 @@ IplImage* addROI(IplImage* in, int horizon)
 	////circCanny = doCanny(in, 100, 200, 3);
 	//// out = doPyrDown(out, filter);
 	//cvReleaseImage(&greenBuoy);
+
+//CvHistogram* RGB2HS_HShist(IplImage* in, int h_bins, int s_bins, float h_max, float s_max, int fact)
+//{
+//	IplImage* hsv = cvCreateImage(cvGetSize(in),8,3);
+//	cvCvtColor(in,hsv,CV_RGB2HSV);
+//
+//	IplImage* h_plane = cvCreateImage(cvGetSize(in),8,1);
+//	IplImage* s_plane = cvCreateImage(cvGetSize(in),8,1);
+//	IplImage* v_plane = cvCreateImage(cvGetSize(in),8,1);
+//	IplImage* planes[] = {h_plane,s_plane};
+//	cvCvtPixToPlane(hsv, h_plane, s_plane, v_plane, 0);
+//
+//		// Build the histogram and compute its contents.
+//	CvHistogram* hist;
+//	{
+//		int hist_size[] = { h_bins, s_bins };
+//		float h_ranges[] = { 0, h_max }; // hue full range [0,180]
+//		float s_ranges[] = { 0, s_max }; // sat full range [0, 255] for depth = 8 bit
+//		float* ranges[] = { h_ranges, s_ranges };
+//		hist = cvCreateHist(2,hist_size,CV_HIST_ARRAY,ranges,1);
+//	}
+//
+//	//Compute histogram
+//	cvCalcHist( planes, hist, 0, 0 );
+//
+//	if(fact > 0) {cvNormalizeHist( hist, fact);}
+//
+//	cvReleaseImage(&h_plane);
+//	cvReleaseImage(&s_plane);
+//	cvReleaseImage(&v_plane);
+//	cvReleaseImage(&hsv);
+//	return(hist);
+//}
 // HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS ---- HISTOGRAM MATCHING KINDA WORKS 
 
 //using two cameras 3/29/2012
@@ -437,3 +470,43 @@ IplImage* addROI(IplImage* in, int horizon)
 		}
 	}
 	*/
+
+//	/* Using the cvHoughCircles method - not that good. Doesn't find enough of the buoys and is inconsistant*/
+//	//find  circles
+//	//CvMemStorage* storage = cvCreateMemStorage(0);
+//	//CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT,  2, 50, 200, 10, 1, 50);
+//	/*CvSeq* circles = cvHoughCircles(thresholded, storage, CV_HOUGH_GRADIENT, 4, 10, 200, 3, 1, 50);*/
+//
+//	/* Use the blob detection method, much more reliable */
+//	CBlobResult blobs;
+//	blobs = CBlobResult( thresholded3, NULL, 0);
+//	
+//	buoys.resize(blobs.GetNumBlobs());
+//	int k = 0;
+//	for(int i = 0; i < (blobs.GetNumBlobs()); i++)
+//	{
+//		//float* p = (float*) cvGetSeqElem(circles, i);
+//		float x = (float)(blobs.GetBlob(i)->MinX() + (( blobs.GetBlob(i)->MaxX() - blobs.GetBlob(i)->MinX() ) / 2.0));
+//		
+//		float y = (float)(blobs.GetBlob(i)->MinY() + (( blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY() ) / 2.0));
+//		float radius =  (float)(blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY())/2;
+//		float diameter = 2*radius;
+//		float n =0;
+//		float total = diameter*diameter;
+//////		for( int k = 0; k < 2*p[2]; k++)
+//////		{
+////			uchar* ptr = (uchar*)(thresholded->imageData  + (int)(y) * thresholded->widthStep);
+////		//	for(int f = 0; f < 2*p[2]; f++)
+////		//	{
+////		//		if(ptr[(int)(p[0]-p[2]+f)]) n++;
+////		//		else n = n;
+////		//	}
+////		//}
+//		if(radius > 7)
+//		{
+//			buoys[k].x= x;
+//			buoys[k].y = y;
+//			buoys[k].radius = radius;
+//			k++;
+//		}
+//	}

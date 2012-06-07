@@ -14,5 +14,5 @@ void turn( char severity, char direction, vector<float> &motors);
 void mainThrust(float motor1, float motor2, vector<float> &motors);
 void sideThrust(float frontLeft, float backLeft, float frontRight, float backRight, vector<float> &motors);
 void navigateChannel(path *control, vector<float> &motors, float height, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff);
-void avoidObsticle(vector<path> &path, vector<float> &motors, float PWMoffset, float maxThrottle, float yellowCoef, float leftOff, float rightOff, float nSlope);
+void avoidObsticle(path *control, vector<path> &path, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float yellowCoef, float leftOff, float rightOff, float optimalSlope, float deadBand);
 void pwm2uchar(vector<float> &motors, unsigned char *motorschar);

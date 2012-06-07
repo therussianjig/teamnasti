@@ -88,10 +88,11 @@ int main()
 	float PWMoffset = 60.0;
 	float maxThrottle = 100.0;
 	float diffCoef = 1.0;
-	float yellowCoef = 1.0;
 	float leftOff = 1.0;
 	float rightOff = 1.0;
-	float nSlope = 1.0;
+	float optimalSlope = 1.0;
+	float deadBand = 0.5;
+	float yellowCoef = 10.0;
 	int taps;
 	float Ki = 0.0;
 	float Kd = 0.0;
@@ -262,7 +263,10 @@ int main()
 			navigateChannel(&control, motors, paths[0].height,
 				closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		}
-		else{avoidObsticle(paths, motors, PWMoffset, maxThrottle, yellowCoef, leftOff, rightOff, nSlope);}
+		else
+		{avoidObsticle(&control, paths, motors, paths[0].height, 
+			PWMoffset, maxThrottle, diffCoef, yellowCoef, leftOff, rightOff, optimalSlope, deadBand);
+		}
 				
 		for(unsigned int i = 0; i < motors.size(); i++)
 		{

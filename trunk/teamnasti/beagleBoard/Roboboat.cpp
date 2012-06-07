@@ -107,7 +107,7 @@ int main()
 	//use this block to read the paramaters in from the text file params.txt
 	/*********get Params*********/
 	ifstream pName("params.txt");
-	float vals[9];
+	float vals[12];
 	float temp;
 	int iLoop = 0;
 	if(!pName) {
@@ -132,6 +132,10 @@ int main()
 	taps = (int)vals[7];
 	Ki = vals[8];
 	Kd = vals[9];
+	optimalSlope = vals[10];
+	deadBand = vals[11];
+	yellowCoef = vals[12];
+	
 	/************************/
 	//uncomment if you wish to ask for two cameras, otherwise leave as it is
 	//cout<<endl<<"One Camera? ";

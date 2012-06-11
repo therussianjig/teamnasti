@@ -13,6 +13,20 @@
 using namespace std;
 using namespace cv;
 
+void aboutFace(char direction, vector<float> &motors) {
+
+	if (direction == 'L') {
+		turn('H', 'L', motors);
+		mainThrust(-100, 100, motors);
+	}
+	
+	else {
+		turn('H', 'R', motors);
+		mainThrust(100, -100, motors);
+	}
+
+}
+
 void speedGateRun(path *control, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff)
 {
 	float throttlePWM = 0;

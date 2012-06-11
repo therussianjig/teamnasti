@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv; 
 
-int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow);
+int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow, float gateSeperation);
 bool redRightReturn(vector<gate> &gates);
 int findPath(IplImage* in, vector<gate> &gates, vector<path> &path);
 void constructControl(CvPoint *start, CvPoint *End, path *control);

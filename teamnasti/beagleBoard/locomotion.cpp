@@ -13,6 +13,42 @@
 using namespace std;
 using namespace cv;
 
+void speedGateRun(path *control, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff)
+{
+	float throttlePWM = 0;
+	float LturnOffset = 0;
+	float RturnOffset = 0;
+	float aheadSlope = 5.0;
+
+	//set throttle value proportional to the length of the path line
+	throttlePWM = maxThrottle;
+	if(throttlePWM > maxThrottle) throttlePWM = maxThrottle;
+	else throttlePWM = throttlePWM;
+
+	if(control->slope > 0)
+	{
+		LturnOffset = diffCoef*(aheadSlope - abs(control->slope));
+		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
+		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
+		RturnOffset = 0.0;
+	}
+	else if(control->slope < 0)
+	{
+		RturnOffset = diffCoef*(aheadSlope - abs(control->slope));
+		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
+		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
+		RturnOffset = 0.0;
+	}
+	else 
+	{
+		LturnOffset = 0;
+		RturnOffset = 0;
+	}
+	//turn(severity, direction, motors);
+	//throttle(throttlePWM, motors);
+	mainThrust(leftOff*(throttlePWM - LturnOffset), rightOff*(throttlePWM - RturnOffset), motors);
+}
+
 void navigateChannel(path *control, vector<float> &motors, float height, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff) 
 {
 	float closingOnGate = height/closingOnGateDen;

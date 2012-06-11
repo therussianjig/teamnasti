@@ -17,8 +17,9 @@ using namespace cv;
 	green buoys that are gates, or it will use the obstacle(yellow buoy) as a gate if it is in obstacle 
 	avoidance mode. 
 */
-int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow)
+int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow, float gateSeperation)
 {
+	cout<<gateSeperation<<endl;
 	//Check if the boat needs to avoid a yellow buoy, if so set the first target to the yellow buoy
 	if(avoidYellow == true)
 	{
@@ -41,10 +42,14 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				gates.resize(redBuoys.size());
 				for(unsigned int i = 0; i < redBuoys.size(); i++)
 				{
-					gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-					gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-					gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
-						cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+					if(abs(redBuoys[i].y - greenBuoys[i].y) < 100)
+					{
+						gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+						gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+						gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
+							cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+					}
+
 				}
 			}
 			else
@@ -52,10 +57,13 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 				gates.resize(greenBuoys.size());
 				for(unsigned int i = 0; i < greenBuoys.size(); i++)
 				{
-					gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-					gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-					gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
-						cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+					if(abs(redBuoys[i].y - greenBuoys[i].y) < 100)
+					{
+						gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+						gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+						gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
+							cvRound((gates[i].green.y + gates[i].red.y)/2.0));
+					}
 				}
 			}
 		}

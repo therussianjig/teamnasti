@@ -77,12 +77,13 @@ int main()
 	vector<wall> blueWall;
 
 	bool RedRightReturn = FALSE;
+	bool speedGate = TRUE;
 	bool oneCAM = FALSE;
 	bool avoidYellow = false;
 
 	char lighting = 0; //inteded to be used to change the HSV limits for buoy 
 					   //detection based on lighting conditions, but time ran out 
-
+	float clearedGates = 0.0;
 	float closingOnGateDen = 1.0;
 	float closingPWM  = 60.0;
 	float PWMoffset = 60.0;
@@ -93,7 +94,8 @@ int main()
 	float optimalSlope = 1.0;
 	float deadBand = 0.5;
 	float yellowCoef = 10.0;
-	int taps;
+	float gateSeperation = 50.0;
+	int taps = 10;
 	float Ki = 0.0;
 	float Kd = 0.0;
 	float width = 0.0;
@@ -107,7 +109,7 @@ int main()
 	//use this block to read the paramaters in from the text file params.txt
 	/*********get Params*********/
 	ifstream pName("params.txt");
-	float vals[12];
+	float vals[14];
 	float temp;
 	int iLoop = 0;
 	if(!pName) {
@@ -135,6 +137,7 @@ int main()
 	optimalSlope = vals[10];
 	deadBand = vals[11];
 	yellowCoef = vals[12];
+	gateSeperation = vals[13];
 	
 	/************************/
 	//uncomment if you wish to ask for two cameras, otherwise leave as it is
@@ -145,12 +148,12 @@ int main()
 	oneCAM = TRUE;
 
 	//capture from camera (as opposed to from video or image)
-	g_capture  = cvCaptureFromCAM(-1);
+	//g_capture  = cvCaptureFromCAM(-1);
 	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	else g_capture2 = 0x0;
 
 	//capture from a video
-	//g_capture = cvCreateFileCapture("highTight.avi");
+	g_capture = cvCreateFileCapture("highWide1.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 
@@ -241,7 +244,7 @@ int main()
 		avoidYellow = checkForObstacle(greenBuoys, redBuoys, yellowBuoys);
 
 		//construct the gates
-		constructGates(greenBuoys, redBuoys, yellowBuoys, gates, avoidYellow);
+		constructGates(greenBuoys, redBuoys, yellowBuoys, gates, avoidYellow, gateSeperation);
 		
 		//determine leaving port/return to port
 		RedRightReturn = redRightReturn(gates);
@@ -262,6 +265,10 @@ int main()
 		constructControl(&(paths[0].nearEnd), &target, &control);
 
 		//Determine motor signals
+		if(speedGate == true)
+		{
+			//speedGateRun(&control, motors, paths[0].height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		}
 		if(avoidYellow == false)
 		{
 			navigateChannel(&control, motors, paths[0].height,
@@ -328,8 +335,8 @@ int main()
 		key=cvWaitKey(1);
 		if (key == 32) {break;}  // Press 'space' to exit program
 		//use the following lines to step through a video frame by frame or grab from camera one at at time
-		//key2=cvWaitKey(-1);
-		//if (key2 == 110) {NULL;}  // Press 'n' to move to next frame
+		//key=cvWaitKey(-1);
+		//if (key == 110) {NULL;}  // Press 'n' to move to next frame
 		//else if (key2 == 32) {break;}  // Press 'space' to exit program
 	}
 #ifdef debug

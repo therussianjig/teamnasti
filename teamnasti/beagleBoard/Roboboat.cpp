@@ -96,7 +96,10 @@ int main()
 	float deadBand = 0.5;
 	float yellowCoef = 10.0;
 	float gateSeperation = 50.0;
+	
 	float blueCount =0;
+	float blueArr[5];
+	int blueLen = 5;
 	
 	
 	int taps = 10;
@@ -261,21 +264,29 @@ int main()
 		//find the path
 		findPath(img, gates, paths);
 		
-		if ((gates.size() == 0) && (blueBuoys.size() > 0)) {
+		for (int jeremyLoop = 0; jeremyLoop++; jeremyLoop < blueLen) {
+			blueArr[jeremyLoop + 1] = blueArr[jeremyLoop];
+		}
 		
-			blueCount ++;
-			if (blueCount > 8) {
+		if ((gates.size() == 0) && (blueBuoys.size() > 0)) {
+			blueArr[0] = 1;
+			if (blueCount > 0.6) {
 				endBlue = true;
 			}
 			else {
 				endBlue = false;
 			}
 		}
-		
-		else { 
-			blueCount =0;
-			endBlue = false;
+
+		else {
+			blueArr[0] = 0;		
 		}
+		
+		blueCount = 0;
+		for (int jeremyLoop = 0; jeremyLoop++; jeremyLoop < blueLen) {
+			blueCount = blueCount + blueArr[jeremyLoop];
+		}
+		blueCount = blueCount / blueLen;
 		
 		//determine a control signal (Gc)
 		width = (float)img->width;

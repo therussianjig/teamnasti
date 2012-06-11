@@ -94,15 +94,15 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 		//hsv_max2 = cvScalar(100, 255, 255, 0);
 		hsv_min  = cvScalar( 0, 5, 245, 0);
 		hsv_max  = cvScalar(60, 10, 250, 0);
-		hsv_min2 = cvScalar(60,  100, 200, 0);
-		hsv_max2 = cvScalar(100, 255, 230, 0);
+		hsv_min2 = cvScalar(90,  150, 100, 0);
+		hsv_max2 = cvScalar(100, 255, 200, 0);
 	}
 	else if (color == 'b')
 	{
-		hsv_min  = cvScalar(40, 0, 0, 0);
-		hsv_max  = cvScalar(20, 255, 255, 0);
-		hsv_min2 = cvScalar(0,  100, 100, 0);
-		hsv_max2 = cvScalar(20, 255, 255, 0);
+		hsv_min  = cvScalar(0, 0, 0, 0);
+		hsv_max  = cvScalar(0, 255, 255, 0);
+		hsv_min2 = cvScalar(200,  100, 100, 0);
+		hsv_max2 = cvScalar(200, 255, 255, 0);
 	}
 	else 
 	{
@@ -149,7 +149,14 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 		float y = (float)(blobs.GetBlob(i)->MinY() + (( blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY() ) / 2.0));
 		float radius =  (float)(blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY())/2;
 		float diameter = 2*radius;
-		if(radius > 9) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		if(color == 'y' && radius > 7) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		{
+			buoys[k].x= x;
+			buoys[k].y = y;
+			buoys[k].radius = radius;
+			k++;
+		}
+		else if(radius > 9) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
 		{
 			buoys[k].x= x;
 			buoys[k].y = y;

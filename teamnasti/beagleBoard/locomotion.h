@@ -17,4 +17,4 @@ void speedGateRun(path *control, vector<float> &motors, float height, float PWMo
 void navigateChannel(path *control, vector<float> &motors, float height, float closingOnGateDen, float closingPWM, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff);
 void avoidObsticle(path *control, vector<path> &path, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float yellowCoef, float leftOff, float rightOff, float optimalSlope, float deadBand);
 void pwm2uchar(vector<float> &motors, unsigned char *motorschar);
-void aboutFace(unsigned char direction,, vector<float> &motors);
+void aboutFace(unsigned char direction, vector<float> &motors);

@@ -13,7 +13,7 @@
 using namespace std;
 using namespace cv;
 
-void aboutFace(char direction, vector<float> &motors) {
+void aboutFace(unsigned char direction, vector<float> &motors){
 
 	if (direction == 'L') {
 		turn('H', 'L', motors);

@@ -80,6 +80,7 @@ int main()
 	bool speedGate = TRUE;
 	bool oneCAM = FALSE;
 	bool avoidYellow = false;
+	bool endBlue = false; //*****************************************************************************
 
 	char lighting = 0; //inteded to be used to change the HSV limits for buoy 
 					   //detection based on lighting conditions, but time ran out 
@@ -95,6 +96,9 @@ int main()
 	float deadBand = 0.5;
 	float yellowCoef = 10.0;
 	float gateSeperation = 50.0;
+	float blueCount =0;
+	
+	
 	int taps = 10;
 	float Ki = 0.0;
 	float Kd = 0.0;
@@ -256,7 +260,23 @@ int main()
 		 
 		//find the path
 		findPath(img, gates, paths);
-
+		
+		if ((gates.size() == 0) && (blueBuoys.size() > 0)) {
+		
+			blueCount ++;
+			if (blueCount > 8) {
+				endBlue = true;
+			}
+			else {
+				endBlue = false;
+			}
+		}
+		
+		else { 
+			blueCount =0;
+			endBlue = false;
+		}
+		
 		//determine a control signal (Gc)
 		width = (float)img->width;
 		target = rollAverage(averageBuff, paths);                        //low pass filter
@@ -269,13 +289,18 @@ int main()
 		{
 			//speedGateRun(&control, motors, paths[0].height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		}
-		if(avoidYellow == false)
+		else if (avoidYellow == false)
 		{
 			navigateChannel(&control, motors, paths[0].height,
-				closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+			closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
 		}
+		
+		else if (endBlue) {
+			aboutFace('L', motors);
+		}
+		
 		else
-		{avoidObsticle(&control, paths, motors, paths[0].height, 
+		{	avoidObsticle(&control, paths, motors, paths[0].height, 
 			PWMoffset, maxThrottle, diffCoef, yellowCoef, leftOff, rightOff, optimalSlope, deadBand);
 		}
 				

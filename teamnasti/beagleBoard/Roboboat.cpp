@@ -155,12 +155,12 @@ int main()
 	oneCAM = TRUE;
 
 	//capture from camera (as opposed to from video or image)
-	g_capture  = cvCaptureFromCAM(-1);
+	//g_capture  = cvCaptureFromCAM(-1);
 	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	else g_capture2 = 0x0;
 
 	//capture from a video
-	//g_capture = cvCreateFileCapture("highWide1.avi");
+	g_capture = cvCreateFileCapture("highWide1.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 
@@ -237,7 +237,7 @@ int main()
 		cvCopy(img, out, NULL); //make out a copy of in
 		
 		//find the buoys
-		img1 = findBuoy(img, horizon, 'g', greenBuoys, lighting);  //green
+		img2 = findBuoy(img, horizon, 'g', greenBuoys, lighting);  //green
 		img2 = findBuoy(img, horizon, 'r', redBuoys, lighting);    //red
 		img2 = findBuoy(img, horizon, 'y', yellowBuoys, lighting); //yellow
 		img2 = findBuoy(img, horizon, 'b', blueBuoys, lighting); //blue
@@ -308,6 +308,7 @@ int main()
 		
 		else if (endBlue) {
 			aboutFace('L', motors);
+			cout<<"Blue buoy detected!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 		}
 		
 		else

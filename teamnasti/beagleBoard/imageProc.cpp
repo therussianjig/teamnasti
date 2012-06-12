@@ -92,24 +92,24 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 		//hsv_max  = cvScalar(60, 10, 250, 0);
 		//hsv_min2 = cvScalar(60,  100, 200, 0);
 		//hsv_max2 = cvScalar(100, 255, 255, 0);
-		hsv_min  = cvScalar( 0, 5, 245, 0);
-		hsv_max  = cvScalar(60, 10, 250, 0);
+		hsv_min  = cvScalar(0, 0, 0, 0);
+		hsv_max  = cvScalar(0, 0, 0, 0);
 		hsv_min2 = cvScalar(90,  150, 100, 0);
 		hsv_max2 = cvScalar(100, 255, 200, 0);
 	}
 	else if (color == 'b')
 	{
-		hsv_min  = cvScalar(0, 0, 0, 0);
-		hsv_max  = cvScalar(0, 255, 255, 0);
-		hsv_min2 = cvScalar(200,  100, 100, 0);
-		hsv_max2 = cvScalar(200, 255, 255, 0);
+		hsv_min  = cvScalar(0, 0, 0);
+		hsv_max  = cvScalar(0, 0, 0);
+		hsv_min2 = cvScalar(0,  100, 50);
+		hsv_max2 = cvScalar(40, 255, 255);
 	}
 	else 
 	{
-		hsv_min  = cvScalar( 40, 255, 255, 0);
-		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(40,  100, 100, 0);
-		hsv_max2 = cvScalar(70, 255, 255, 0);
+		hsv_min  = cvScalar( 0, 0, 0, 0);
+		hsv_max  = cvScalar(0, 0, 0, 0);
+		hsv_min2 = cvScalar(0,  0, 0, 0);
+		hsv_max2 = cvScalar(0, 0, 0, 0);
 	}
 
 	//converter image from RGB -> HSV
@@ -156,7 +156,14 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 			buoys[k].radius = radius;
 			k++;
 		}
-		else if(radius > 9) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		else if(color == 'b' && radius > 20) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		{
+			buoys[k].x= x;
+			buoys[k].y = y;
+			buoys[k].radius = radius;
+			k++;
+		}
+		else if( color != 'b' && color != 'y' && radius > 9) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
 		{
 			buoys[k].x= x;
 			buoys[k].y = y;
@@ -188,12 +195,12 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	}
 
 #ifdef debug
-	cvNamedWindow( "HSV",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "HSV", thresholded );
-	cvNamedWindow( "thresholded",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "thresholded", thresholded3 );
-	cvNamedWindow( "thresholded2",CV_WINDOW_AUTOSIZE);
-	cvShowImage( "thresholded2", thresholded2 );
+	cvNamedWindow( "thresholded 1",CV_WINDOW_AUTOSIZE);
+	cvShowImage( "thresholded 1", thresholded );
+	cvNamedWindow( "thresholded Ored",CV_WINDOW_AUTOSIZE);
+	cvShowImage( "thresholded Ored", thresholded3 );
+	cvNamedWindow( "thresholded 2",CV_WINDOW_AUTOSIZE);
+	cvShowImage( "thresholded 2", thresholded2 );
 #endif
 	
 	cvReleaseImage(&thresholded);

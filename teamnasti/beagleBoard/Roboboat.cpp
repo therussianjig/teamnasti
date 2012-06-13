@@ -160,7 +160,7 @@ int main()
 	else g_capture2 = 0x0;
 
 	//capture from a video
-	g_capture = cvCreateFileCapture("highWide1.avi");
+	g_capture = cvCreateFileCapture("test0067.jpeg");//highWide1.avi
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 
@@ -264,7 +264,7 @@ int main()
 		//find the path
 		findPath(img, gates, paths);
 		
-		for (int jeremyLoop = 0; jeremyLoop++; jeremyLoop < blueLen) {
+		for (int jeremyLoop = 0; jeremyLoop < blueLen; jeremyLoop++) {
 			blueArr[jeremyLoop + 1] = blueArr[jeremyLoop];
 		}
 		
@@ -283,7 +283,7 @@ int main()
 		}
 		
 		blueCount = 0;
-		for (int jeremyLoop = 0; jeremyLoop++; jeremyLoop < blueLen) {
+		for (int jeremyLoop = 0; jeremyLoop < blueLen; jeremyLoop++) {
 			blueCount = blueCount + blueArr[jeremyLoop];
 		}
 		blueCount = blueCount / blueLen;
@@ -296,11 +296,11 @@ int main()
 		constructControl(&(paths[0].nearEnd), &target, &control);
 
 		//Determine motor signals
-		if(speedGate == true)
-		{
-			//speedGateRun(&control, motors, paths[0].height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
-		}
-		else if (avoidYellow == false)
+		//if(speedGate == true)
+		//{
+		//	//speedGateRun(&control, motors, paths[0].height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
+		//}
+		if (avoidYellow == false)
 		{
 			navigateChannel(&control, motors, paths[0].height,
 			closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);

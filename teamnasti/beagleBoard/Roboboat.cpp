@@ -60,6 +60,8 @@ int main()
 	IplImage* img = 0;
 	IplImage* img1 = 0;
 	IplImage* img2 = 0;
+	IplImage* img3 = 0;
+	IplImage* img4 = 0;
 	IplImage* out = 0;
 
 	vector<float> motors; //vector of motor values defined from 0-100 for pwm %
@@ -76,9 +78,10 @@ int main()
 	vector<wall> redWall;
 	vector<wall> blueWall;
 
-	bool RedRightReturn = FALSE;
-	bool speedGate = TRUE;
-	bool oneCAM = FALSE;
+	bool RedRightReturn = false;
+	bool speedGate = true;
+	char inGate = 1;
+	bool oneCAM = true;
 	bool avoidYellow = false;
 	bool endBlue = false; //*****************************************************************************
 
@@ -98,10 +101,11 @@ int main()
 	float gateSeperation = 50.0;
 	
 	float blueCount =0;
-	float blueArr[5];
+	float blueArr[6];
 	int blueLen = 5;
 	
-	
+	char gateCount = 0;
+
 	int taps = 10;
 	float Ki = 0.0;
 	float Kd = 0.0;
@@ -155,12 +159,12 @@ int main()
 	oneCAM = TRUE;
 
 	//capture from camera (as opposed to from video or image)
-	//g_capture  = cvCaptureFromCAM(-1);
+	g_capture  = cvCaptureFromCAM(-1);
 	if(oneCAM == FALSE) g_capture2 = cvCaptureFromCAM(1);
 	else g_capture2 = 0x0;
 
 	//capture from a video
-	g_capture = cvCreateFileCapture("test0067.jpeg");//highWide1.avi
+	//g_capture = cvCreateFileCapture("highWide1.avi");
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_WIDTH, 160 );
 	//cvSetCaptureProperty( g_capture, CV_CAP_PROP_FRAME_HEIGHT, 140 );
 
@@ -237,10 +241,10 @@ int main()
 		cvCopy(img, out, NULL); //make out a copy of in
 		
 		//find the buoys
-		img2 = findBuoy(img, horizon, 'g', greenBuoys, lighting);  //green
+		img1 = findBuoy(img, horizon, 'g', greenBuoys, lighting);  //green
 		img2 = findBuoy(img, horizon, 'r', redBuoys, lighting);    //red
-		img2 = findBuoy(img, horizon, 'y', yellowBuoys, lighting); //yellow
-		img2 = findBuoy(img, horizon, 'b', blueBuoys, lighting); //blue
+		img3 = findBuoy(img, horizon, 'y', yellowBuoys, lighting); //yellow
+		//img4 = findBuoy(img, horizon, 'b', blueBuoys, lighting); //blue
 		/*
 			currently, the code displayed the images as the processing is performed, if the 
 			thresholded binary image wish to be views for a particullar color, you can just 
@@ -267,7 +271,7 @@ int main()
 		for (int jeremyLoop = 0; jeremyLoop < blueLen; jeremyLoop++) {
 			blueArr[jeremyLoop + 1] = blueArr[jeremyLoop];
 		}
-		
+		blueArr[0] = 0;
 		if ((gates.size() == 0) && (blueBuoys.size() > 0)) {
 			blueArr[0] = 1;
 			if (blueCount > 0.6) {
@@ -286,7 +290,7 @@ int main()
 		for (int jeremyLoop = 0; jeremyLoop < blueLen; jeremyLoop++) {
 			blueCount = blueCount + blueArr[jeremyLoop];
 		}
-		blueCount = blueCount / blueLen;
+		blueCount = blueCount / (float)blueLen;
 		
 		//determine a control signal (Gc)
 		width = (float)img->width;
@@ -296,11 +300,15 @@ int main()
 		constructControl(&(paths[0].nearEnd), &target, &control);
 
 		//Determine motor signals
-		//if(speedGate == true)
-		//{
-		//	//speedGateRun(&control, motors, paths[0].height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
-		//}
-		if (avoidYellow == false)
+		//cout<<(int)gateCount<<endl;
+		speedGate = false;
+		if(speedGate == true)
+		{
+			speedGateRun(&control, motors, img->height, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff, speedGate, inGate, gateCount);
+			if(gateCount >= 2) speedGate = false;
+			cout<<"speed gate run"<<endl;
+		}
+		else if (avoidYellow == false)
 		{
 			navigateChannel(&control, motors, paths[0].height,
 			closingOnGateDen, closingPWM, PWMoffset, maxThrottle, diffCoef, leftOff, rightOff);
@@ -366,6 +374,8 @@ int main()
 		cvReleaseImage(&img);
 		cvReleaseImage(&img1);
 		cvReleaseImage(&img2);
+		cvReleaseImage(&img3);
+		cvReleaseImage(&img4);
 		//cvReleaseImage(&img_full);
 
 		// wait for a key arg = pos, wait that long, =0 or neg wait indeff

@@ -20,6 +20,8 @@ using namespace cv;
 int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buoy> &yellowBuoys, vector<gate> &gates, bool avoidYellow, float gateSeperation)
 {
 	char n = 0;
+	char k = 0;
+	char difference = 20;
 	//cout<<gateSeperation<<endl;
 	//Check if the boat needs to avoid a yellow buoy, if so set the first target to the yellow buoy
 	if(avoidYellow == true)
@@ -38,11 +40,50 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 		if ((greenBuoys.size() > 0) && (redBuoys.size() > 0))
 		{
 			//determine which color buoys there are more of, use the smaller 
-			if (greenBuoys.size() > redBuoys.size())
+			if (greenBuoys.size() > redBuoys.size()) //more green
 			{
 				gates.resize(redBuoys.size());
 				n = 0;
+				k = 0; 
 				for(unsigned int i = 0; i < redBuoys.size(); i++)
+				{
+					if(!(abs(redBuoys[k].y - greenBuoys[i].y) < difference) && redBuoys[0].y < greenBuoys[0].y) k = i + 1;
+					else k = i;
+					if(abs(redBuoys[i].y - greenBuoys[k].y) < difference)
+					{
+						gates[n].green = cvPoint(cvRound(greenBuoys[k].x), cvRound(greenBuoys[k].y));
+						gates[n].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
+						gates[n].goal = cvPoint(cvRound((gates[n].green.x + gates[n].red.x)/2.0), 
+							cvRound((gates[n].green.y + gates[n].red.y)/2.0));
+						n++;
+					//	cout<<""<<endl;
+					}
+				}
+			}
+			else if( redBuoys.size() > greenBuoys.size()) //more red buoys
+			{
+				n = 0;
+				k = 0;
+				gates.resize(greenBuoys.size());
+				for(unsigned int i = 0; i < greenBuoys.size(); i++)
+				{
+					if(!(abs(redBuoys[k].y - greenBuoys[i].y) < difference) && redBuoys[0].y > greenBuoys[0].y) k = i + 1;
+					else k = i;
+					if(abs(redBuoys[k].y - greenBuoys[i].y) < difference)
+					{
+						gates[n].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
+						gates[n].red = cvPoint(cvRound(redBuoys[k].x), cvRound(redBuoys[k].y));
+						gates[n].goal = cvPoint(cvRound((gates[n].green.x + gates[n].red.x)/2.0), 
+							cvRound((gates[n].green.y + gates[n].red.y)/2.0));
+						n++;
+					}
+				}
+			}
+			else
+			{
+				n = 0;
+				gates.resize(greenBuoys.size());
+				for(unsigned int i = 0; i < greenBuoys.size(); i++)
 				{
 					if(abs(redBuoys[i].y - greenBuoys[i].y) < 10)
 					{
@@ -51,25 +92,25 @@ int constructGates( vector<buoy> &greenBuoys, vector<buoy> &redBuoys, vector<buo
 						gates[n].goal = cvPoint(cvRound((gates[n].green.x + gates[n].red.x)/2.0), 
 							cvRound((gates[n].green.y + gates[n].red.y)/2.0));
 						n++;
-						cout<<""<<endl;
-					}
-				}
-			}
-			else
-			{
-				gates.resize(greenBuoys.size());
-				for(unsigned int i = 0; i < greenBuoys.size(); i++)
-				{
-					if(abs(redBuoys[i].y - greenBuoys[i].y) < 10)
-					{
-						gates[i].red = cvPoint(cvRound(redBuoys[i].x), cvRound(redBuoys[i].y));
-						gates[i].green = cvPoint(cvRound(greenBuoys[i].x), cvRound(greenBuoys[i].y));
-						gates[i].goal = cvPoint(cvRound((gates[i].green.x + gates[i].red.x)/2.0), 
-							cvRound((gates[i].green.y + gates[i].red.y)/2.0));
 					}
 				}
 			}
 		}
+		//else if(greenBuoys.size() == 0 && redBuoys.size() > 0)
+		//{
+		//	gates.resize(1);
+		//	
+		//	gates[0].red = cvPoint(cvRound(redBuoys[0].x), cvRound(redBuoys[0].y));
+		//	gates[0].green = gates[0].red;
+		//	gates[0].goal = gates[0].red;
+		//}
+		//else if(redBuoys.size() == 0 && greenBuoys.size() > 0)
+		//{
+		//	gates.resize(1);
+		//	gates[0].green = cvPoint(cvRound(greenBuoys[0].x), cvRound(greenBuoys[0].y));
+		//	gates[0].red = gates[0].green;
+		//	gates[0].goal = gates[0].green;
+		//}
 		else
 		{
 			//return different values for different cases, not used currently

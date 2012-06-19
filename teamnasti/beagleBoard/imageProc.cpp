@@ -65,22 +65,21 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	CvScalar hsv_max;
 	CvScalar hsv_min2;
 	CvScalar hsv_max2;
-
 	//for low light, decrease minimum value  (3rd input)
 	//for high light, decrease minimum saturation (2nd input)
 	if(color == 'g')
 	{
-		hsv_min  = cvScalar( 50, 255, 255, 0);
-		hsv_max  = cvScalar(70, 255, 255, 0);
-		hsv_min2 = cvScalar(50, 200, 50, 0);
-		hsv_max2 = cvScalar(70, 255, 255, 0);
+		hsv_min  = cvScalar( 50, 255, 255);
+		hsv_max  = cvScalar(70, 255, 255);
+		hsv_min2 = cvScalar(30, 200, 50);
+		hsv_max2 = cvScalar(60, 255, 255);
 	}
 	else if (color == 'r')
 	{
-		hsv_min  = cvScalar( 0, 200, 200, 0);
-		hsv_max  = cvScalar(30, 255, 255, 0);
-		hsv_min2 = cvScalar(110, 200, 110, 0);
-		hsv_max2 = cvScalar(180, 255, 255, 0);
+		hsv_min  = cvScalar( 0, 150, 100);
+		hsv_max  = cvScalar(30, 255, 255);
+		hsv_min2 = cvScalar(100, 150, 110);
+		hsv_max2 = cvScalar(180, 255, 255);
 		//hsv_min  = cvScalar( 0, 150, 100, 0);
 		//hsv_max  = cvScalar(30, 255, 255, 0);
 		//hsv_min2 = cvScalar(100,  150, 100, 0);
@@ -88,21 +87,17 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	}
 	else if (color == 'y')
 	{
-		//hsv_min  = cvScalar( 0, 5, 245, 0);
-		//hsv_max  = cvScalar(60, 10, 250, 0);
-		//hsv_min2 = cvScalar(60,  100, 200, 0);
-		//hsv_max2 = cvScalar(100, 255, 255, 0);
-		hsv_min  = cvScalar(0, 0, 0, 0);
-		hsv_max  = cvScalar(0, 0, 0, 0);
-		hsv_min2 = cvScalar(90,  150, 100, 0);
-		hsv_max2 = cvScalar(100, 255, 200, 0);
+		hsv_min  = cvScalar( 0, 255, 255);
+		hsv_max  = cvScalar(0, 255, 255);
+		hsv_min2 = cvScalar(75, 100, 80);
+		hsv_max2 = cvScalar(95, 255, 255);
 	}
 	else if (color == 'b')
 	{
-		hsv_min  = cvScalar(0, 0, 0);
-		hsv_max  = cvScalar(0, 0, 0);
-		hsv_min2 = cvScalar(0,  100, 50);
-		hsv_max2 = cvScalar(40, 255, 255);
+		hsv_min  = cvScalar( 0, 255, 255);
+		hsv_max  = cvScalar(0, 255, 255);
+		hsv_min2 = cvScalar(0, 60, 60);
+		hsv_max2 = cvScalar(10, 255, 255);
 	}
 	else 
 	{
@@ -123,7 +118,7 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 	//Atempt to doctor the image so that the circles are found easier
 	if(color != 'y'){ cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3); }
 
-	cvErode(thresholded3, thresholded3, NULL, 1); //remove speckles (noise)
+	cvErode(thresholded3, thresholded3, NULL, 2); //remove speckles (noise)
 	//cvSmooth(thresholded, thresholded, CV_BLUR, 9, 9); //heavy blur
 	cvDilate(thresholded3, thresholded3, NULL, 3); //return blobs that are left to proper size
 	cvSmooth(thresholded3, thresholded3, CV_GAUSSIAN, 3, 3);
@@ -149,7 +144,7 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 		float y = (float)(blobs.GetBlob(i)->MinY() + (( blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY() ) / 2.0));
 		float radius =  (float)(blobs.GetBlob(i)->MaxY() - blobs.GetBlob(i)->MinY())/2;
 		float diameter = 2*radius;
-		if(color == 'y' && radius > 7) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		if(color == 'y' && radius > 5) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
 		{
 			buoys[k].x= x;
 			buoys[k].y = y;
@@ -163,7 +158,7 @@ IplImage* findBuoy(IplImage* in, int horizon, char color, vector<buoy> &buoys, c
 			buoys[k].radius = radius;
 			k++;
 		}
-		else if( color != 'b' && color != 'y' && radius > 9) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
+		else if( color != 'b' && color != 'y' && radius > 5) //use only the larger 'buoys'. if they are too small they probably arent buoys at all
 		{
 			buoys[k].x= x;
 			buoys[k].y = y;

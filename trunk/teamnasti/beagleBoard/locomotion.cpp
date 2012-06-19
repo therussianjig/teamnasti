@@ -27,7 +27,7 @@ void aboutFace(unsigned char direction, vector<float> &motors){
 
 }
 
-void speedGateRun(path *control, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff)
+void speedGateRun(path *control, vector<float> &motors, float height, float PWMoffset, float maxThrottle, float diffCoef, float leftOff, float rightOff, bool &speedGate, char &inGate, char &gateCount)
 {
 	float throttlePWM = 0;
 	float LturnOffset = 0;
@@ -38,6 +38,20 @@ void speedGateRun(path *control, vector<float> &motors, float height, float PWMo
 	throttlePWM = maxThrottle;
 	if(throttlePWM > maxThrottle) throttlePWM = maxThrottle;
 	else throttlePWM = throttlePWM;
+
+	if(control->length < height/4.0)
+	{
+		inGate++;
+		cout<<"WE'RE GOING IN!!!!!"<<endl;
+	}
+	else if(inGate > 10 && control->length > height/4.0) inGate = 0;
+
+	if(inGate == 0)
+	{
+		gateCount++;
+		inGate++;
+	}
+	else gateCount = gateCount;
 
 	if(control->slope > 0)
 	{
@@ -164,7 +178,7 @@ void avoidObsticle(path *control, vector<path> &path, vector<float> &motors, flo
 			controlSlope = abs(control->slope) - optimalSlope;
 		}
 		//Moving too far away from the Obstacle
-		if(abs(control->slope) < (optimalSlope - deadBand))
+		else if(abs(control->slope) < (optimalSlope - deadBand))
 		{
 			if(control->slope < 0) direction = 'R';
 			else                  direction = 'L';
@@ -183,17 +197,17 @@ void avoidObsticle(path *control, vector<path> &path, vector<float> &motors, flo
 	}
 	if(direction == 'L')
 	{
-		LturnOffset = diffCoef*(aheadSlope - controlSlope);
+		LturnOffset = diffCoef*(controlSlope);
 		if(LturnOffset >= throttlePWM){ LturnOffset = throttlePWM; }
 		else if(LturnOffset < 1.0)    { LturnOffset = 0; }
 		RturnOffset = 0.0;
 	}
 	else if(direction == 'R')
 	{
-		RturnOffset = diffCoef*(aheadSlope - controlSlope);
+		RturnOffset = diffCoef*(controlSlope);
 		if(RturnOffset >= throttlePWM){ RturnOffset = throttlePWM; }
 		else if(RturnOffset < 1.0)    { RturnOffset = 0; }
-		RturnOffset = 0.0;
+		LturnOffset = 0.0;
 	}
 	else 
 	{
